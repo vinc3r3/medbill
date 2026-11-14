@@ -1,0 +1,55 @@
+# Tasks
+
+Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "Done when" check passes.
+
+- [ ] **1. Scaffold the app.** Next.js + TypeScript + Tailwind + Vitest; `lib/types.ts` from the spec;
+  Supabase `cases` table matching `Case`; env loading from `.env.local`.
+  - Done when: `npm run dev` shows the home page, and a test case saves and reads back.
+
+- [ ] **2. Create sample data.** In `/samples/{a,b,c}`, a synthetic bill and EOB (PNG or PDF) plus
+  `expected.json`, matching the sample table in the spec. Use invented names and addresses.
+  - Done when: all six documents and three `expected.json` files exist and validate against the types.
+
+- [ ] **3. Build the upload screen.** Two drop zones labelled Bill and EOB, with previews.
+  - Done when: both previews show for each sample pair.
+
+- [ ] **4. Add on-device OCR.** Tesseract.js in a web worker; show raw text in a debug panel.
+  - Done when: text appears for all samples, and no network request carries document text.
+
+- [ ] **5. Add redaction.** Profile form saved in `localStorage`; apply the redaction rules from the spec;
+  show a highlighted redacted view.
+  - Done when: no profile value appears in the redacted text of any sample (unit test + visual check).
+
+- [ ] **6. Extract with AI.** `/api/extract` sends redacted text to Claude and validates the JSON.
+  - Done when: extracted totals match `expected.json` for all three cases.
+
+- [ ] **7. Write the flag rules, tests first.** Pure `checkFlags(bill, eob)` behind `/api/check`.
+  - Done when: tests pass — A gives 0 flags, B gives 1 `duplicate`, C gives `over_patient_responsibility`
+    with a $367 difference.
+
+- [ ] **8. Build the review screen.** Bill and EOB lines side by side, flagged rows highlighted, a
+  plain-language explanation per flag, and a "to question" total.
+  - Done when: case C shows "$367 to question".
+
+- [ ] **9. Draft and edit the letter.** `/api/letter` drafts from the flags with placeholders; editable text
+  area; placeholders filled in the browser on approval.
+  - Done when: the letter cites dates, descriptions and amounts, and the `/api/letter` request holds no
+    profile values.
+
+- [ ] **10. Send.** "Approve and send" calls `/api/send`, which creates a Lob certified letter (test key).
+  - Done when: Lob returns a letter id and preview link, and the case status becomes `sent`.
+
+- [ ] **11. Track.** Handle Lob tracking events in `/api/lob-webhook`; set a reminder 30 days after sending;
+  add a "Simulate delivery" button (test mode may not send tracking events).
+  - Done when: a status change to `delivered` shows on the dashboard.
+
+- [ ] **12. Build the dashboard.** All cases with status chips and a total "money saved".
+  - Done when: after running case C, it shows `sent` and $367.
+
+- [ ] **13. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
+  - Done when: the full demo runs three times in a row without a restart.
+
+## Stretch
+
+- [ ] **14. Import EOBs from the Flexpa sandbox** instead of uploading them.
+- [ ] **15. Send by email** from the user's Gmail as an alternative to mail.
