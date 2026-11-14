@@ -149,9 +149,10 @@ Supabase Auth, email + password. `cases.user_id uuid not null references auth.us
 user from the session cookie and only see that user's cases (unknown or other users' cases → 404).
 Public routes: `/`, sign-in/up pages, `/api/mail-webhook`, `/api/stripe-webhook`.
 
-## Payments (Task 15, plan to confirm)
+## Payments (decided in Task 16, built in Task 17)
 
-Stripe test mode. Subscription (proposed $12/month, includes 1 certified letter per month). Checkout to
+Stripe test mode. Model not decided yet (Task 16): candidates are a subscription (e.g. $12/month incl. 1 letter),
+an annual plan, pay per letter, a success fee, or a mix. Working assumption until then: subscription. Checkout to
 subscribe, Customer Portal to manage/cancel, `/api/stripe-webhook` keeps the plan in sync. `/api/send`
 requires an active plan with a letter left this month.
 

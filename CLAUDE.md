@@ -29,7 +29,7 @@ Task list and progress: @docs/tasks.md
 - AI extraction with structured JSON output (server routes only): Gemini by default (free tier,
   `gemini-3.5-flash-lite`), Claude (`claude-opus-5-5`) as an alternative. Switch with `EXTRACT_PROVIDER`.
 - Supabase Postgres (`cases`, `extractions` cache) + Supabase Auth (email + password)
-- Stripe (test mode) for the subscription
+- Stripe (test mode) for payments (model decided in Task 16)
 - PostGrid Print & Mail API for certified letters (test mode), behind `lib/mail`
 - Vitest for unit tests
 

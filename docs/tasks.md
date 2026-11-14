@@ -98,27 +98,40 @@ are verified by signature.
   - Done when: for case C, uploading a corrected statement ($45 due) marks the case `resolved` with $367
     saved, and the dashboard total uses actual savings for resolved cases.
 
-- [ ] **16. Add Stripe (test mode).** Subscription via Stripe Checkout + Customer Portal; webhook keeps the
-  user's plan in sync. Sending a letter requires an active plan. Plan *to confirm*: $12/month including
-  1 certified letter per month (each live certified letter costs ~$5–10 in postage and printing).
-  - Done when: test card 4242… completes Checkout and the plan becomes active via webhook; sending is
-    blocked without a plan; cancelling in the portal removes access.
+- [ ] **16. Decide pricing.** The need is occasional (a few bills a year), so a monthly subscription may churn.
+  Compare: monthly ($10–15), annual plan, pay per letter (~$5–10 cost each in live mode), success fee
+  (% of money saved, charged when a case is `resolved`), or a mix (e.g. free checks + pay per letter + optional
+  annual plan). Consider running costs (spec, "Payments") and what's easiest to show judges with Stripe.
+  - Done when: the chosen model, prices and what's free vs paid are written into the spec's "Payments"
+    section and Task 17 is updated to match.
 
-- [ ] **17. Frontend enhancement.** Landing page, app shell, case page with a tracking timeline, settings page
+- [ ] **17. Add Stripe (test mode).** Implement the model chosen in Task 16 with Stripe Checkout (and the
+  Customer Portal if there's a subscription); `/api/stripe-webhook` keeps payments/plans in sync; sending a
+  letter requires payment or an active plan as decided.
+  - Done when: test card 4242… completes Checkout and access is granted via the webhook; sending is blocked
+    without payment/plan; a cancelled or failed payment removes access.
+
+- [ ] **18. Frontend enhancement.** Landing page, app shell, case page with a tracking timeline, settings page
   for the profile and plan; consistent design, mobile-first.
   - Done when: every page works at 390px with no sideways scroll, has no console errors, and the full flow
     can be completed from the landing page.
 
-- [ ] **18. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
+- [ ] **19. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
   - Done when: the full demo runs three times in a row without a restart.
 
 ## Stretch
 
-- [ ] **19. Import EOBs from the Flexpa sandbox** instead of uploading them.
-- [ ] **20. Send by email** from the user's Gmail as an alternative to mail.
-- [ ] **21. Reply-by-email address.** Each letter asks for replies at a unique address
+- [ ] **20. Import EOBs from the Flexpa sandbox** instead of uploading them.
+- [ ] **21. Send by email** from the user's Gmail as an alternative to mail.
+- [ ] **22. Reply-by-email address.** Each letter asks for replies at a unique address
   (`case-<ref>@replies.<domain>`); an inbound-email webhook (Postmark/SendGrid/Mailgun) attaches replies to
   the case automatically. Needs a domain and an email provider.
-- [ ] **22. Virtual mailbox.** Use a mail-scanning service as the reply address so paper replies are scanned
+- [ ] **23. Virtual mailbox.** Use a mail-scanning service as the reply address so paper replies are scanned
   and attached automatically. Paid; real use needs the patient's consent as authorized representative
   (HIPAA obligations).
+- [ ] **24. Deadline awareness.** Each case shows the windows that matter (when to follow up, when to escalate
+  to the insurer or a state regulator, typical dispute/appeal windows) with reminders. Letters already ask the
+  provider not to send the balance to collections during review; surface that in the case timeline.
+- [ ] **25. Outcome proof.** A resolved case gets a summary page: original bill vs corrected bill, amount saved,
+  and the timeline (letter → delivered → reply). Downloadable/shareable with personal details removed; doubles
+  as marketing ("we got you $367 back").
