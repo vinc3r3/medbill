@@ -85,9 +85,13 @@ are verified by signature.
     route). The case *page* shows the not-found UI with HTTP 200, because it streams (status is sent before
     the lookup in `<Suspense>`); no data leaks. Needs `SUPABASE_PUBLISHABLE_KEY` + migration 0004.
 
-- [ ] **13. Track.** Handle PostGrid tracking events in `/api/mail-webhook`; set a reminder 30 days after sending;
+- [x] **13. Track.** Handle PostGrid tracking events in `/api/mail-webhook`; set a reminder 30 days after sending;
   add a "Simulate delivery" button (test mode may not send tracking events).
   - Done when: a status change to `delivered` shows on the dashboard.
+  - Note: verified on Vercel. Real PostGrid webhooks (JWT/HS256, test mode fires them) moved a case to
+    `delivered` within ~1s; "Simulate delivery" works locally too. Shown on the case page and `GET /api/cases`
+    for now; Task 14's dashboard check covers the dashboard. Webhook: `npm run postgrid:webhook`; check:
+    `npm run e2e:track`.
 
 - [ ] **14. Build the dashboard.** The signed-in user's cases with status chips and a total "money saved";
   app navigation (dashboard, new check, settings).
