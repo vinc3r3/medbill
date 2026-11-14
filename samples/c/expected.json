@@ -1,0 +1,58 @@
+{
+  "bill": {
+    "provider": "Summit Urgent Care",
+    "serviceDate": "2026-07-21",
+    "lines": [
+      {
+        "date": "2026-07-21",
+        "code": "99204",
+        "description": "Office visit, new patient, moderate",
+        "billed": 285
+      },
+      {
+        "date": "2026-07-21",
+        "code": "73610",
+        "description": "X-ray, ankle, 3 views",
+        "billed": 127
+      }
+    ],
+    "amountDue": 412
+  },
+  "eob": {
+    "insurer": "Cedarline Health Plan",
+    "claimId": "CLM-260721-0956",
+    "lines": [
+      {
+        "date": "2026-07-21",
+        "code": "99204",
+        "description": "Office visit, new patient, moderate",
+        "billed": 410,
+        "allowed": 230,
+        "planPaid": 195,
+        "patientResponsibility": 35
+      },
+      {
+        "date": "2026-07-21",
+        "code": "73610",
+        "description": "X-ray, ankle, 3 views",
+        "billed": 165,
+        "allowed": 90,
+        "planPaid": 80,
+        "patientResponsibility": 10
+      }
+    ],
+    "totalPatientResponsibility": 45
+  },
+  "flags": [
+    {
+      "kind": "over_patient_responsibility",
+      "billLineIdx": null,
+      "eobLineIdx": null,
+      "expected": 45,
+      "billed": 412,
+      "difference": 367,
+      "explanation": "The bill asks for $412.00, but the EOB says your share for this visit is $45.00. Could the provider check whether the insurance payment and adjustments were applied?"
+    }
+  ],
+  "savedAmount": 367
+}

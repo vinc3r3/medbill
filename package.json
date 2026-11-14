@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:db": "VITEST_DB=1 vitest run tests/db.integration.test.ts"
+    "test:db": "VITEST_DB=1 vitest run tests/db.integration.test.ts",
+    "samples": "node scripts/make-samples.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

@@ -1,0 +1,79 @@
+{
+  "bill": {
+    "provider": "Riverbend Medical Group",
+    "serviceDate": "2026-05-12",
+    "lines": [
+      {
+        "date": "2026-05-12",
+        "code": "99214",
+        "description": "Office visit, established patient, moderate",
+        "billed": 55
+      },
+      {
+        "date": "2026-05-12",
+        "code": "80053",
+        "description": "Comprehensive metabolic panel",
+        "billed": 28.75
+      },
+      {
+        "date": "2026-05-12",
+        "code": "80053",
+        "description": "Comprehensive metabolic panel",
+        "billed": 28.75
+      },
+      {
+        "date": "2026-05-12",
+        "code": "36415",
+        "description": "Routine venipuncture (blood draw)",
+        "billed": 6
+      }
+    ],
+    "amountDue": 118.5
+  },
+  "eob": {
+    "insurer": "Cedarline Health Plan",
+    "claimId": "CLM-260512-4402",
+    "lines": [
+      {
+        "date": "2026-05-12",
+        "code": "99214",
+        "description": "Office visit, established patient, moderate",
+        "billed": 240,
+        "allowed": 145,
+        "planPaid": 90,
+        "patientResponsibility": 55
+      },
+      {
+        "date": "2026-05-12",
+        "code": "80053",
+        "description": "Comprehensive metabolic panel",
+        "billed": 95,
+        "allowed": 38.75,
+        "planPaid": 10,
+        "patientResponsibility": 28.75
+      },
+      {
+        "date": "2026-05-12",
+        "code": "36415",
+        "description": "Routine venipuncture (blood draw)",
+        "billed": 25,
+        "allowed": 9,
+        "planPaid": 3,
+        "patientResponsibility": 6
+      }
+    ],
+    "totalPatientResponsibility": 89.75
+  },
+  "flags": [
+    {
+      "kind": "duplicate",
+      "billLineIdx": 2,
+      "eobLineIdx": 1,
+      "expected": 0,
+      "billed": 28.75,
+      "difference": 28.75,
+      "explanation": "The bill lists \"Comprehensive metabolic panel\" on 2026-05-12 twice, at $28.75 each, but the EOB shows it once. Was this test done twice, or is the second line a duplicate?"
+    }
+  ],
+  "savedAmount": 28.75
+}

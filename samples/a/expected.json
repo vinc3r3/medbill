@@ -1,0 +1,48 @@
+{
+  "bill": {
+    "provider": "Lakeside Family Medicine",
+    "serviceDate": "2026-03-04",
+    "lines": [
+      {
+        "date": "2026-03-04",
+        "code": "99213",
+        "description": "Office visit, established patient",
+        "billed": 40
+      },
+      {
+        "date": "2026-03-04",
+        "code": "85025",
+        "description": "Complete blood count (CBC)",
+        "billed": 12.5
+      }
+    ],
+    "amountDue": 52.5
+  },
+  "eob": {
+    "insurer": "Cedarline Health Plan",
+    "claimId": "CLM-260304-1187",
+    "lines": [
+      {
+        "date": "2026-03-04",
+        "code": "99213",
+        "description": "Office visit, established patient",
+        "billed": 185,
+        "allowed": 112.4,
+        "planPaid": 72.4,
+        "patientResponsibility": 40
+      },
+      {
+        "date": "2026-03-04",
+        "code": "85025",
+        "description": "Complete blood count (CBC)",
+        "billed": 48,
+        "allowed": 22.5,
+        "planPaid": 10,
+        "patientResponsibility": 12.5
+      }
+    ],
+    "totalPatientResponsibility": 52.5
+  },
+  "flags": [],
+  "savedAmount": 0
+}
