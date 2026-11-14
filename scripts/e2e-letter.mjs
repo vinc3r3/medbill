@@ -5,7 +5,7 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
-import { createTestUser, deleteTestUser, signIn } from './e2e-helpers.mjs';
+import { createTestUser, deleteTestUser, openHome, signIn } from './e2e-helpers.mjs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const OUT_DIR = process.env.OUT_DIR ?? '.e2e';
@@ -30,7 +30,7 @@ try {
   const letterRequests = [];
   context.on('request', (r) => { if (r.url().includes('/api/letter')) letterRequests.push(r.postData() ?? ''); });
 
-  await page.goto(BASE_URL);
+  await openHome(page, BASE_URL);
   await page.getByLabel('Full name').fill(profile.name);
   await page.getByLabel('Date of birth').fill(`${yyyy}-${mm}-${dd}`);
   await page.getByLabel('Insurance member ID').fill(profile.memberId);

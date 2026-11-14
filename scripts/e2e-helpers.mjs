@@ -36,9 +36,9 @@ export async function signIn(page, baseUrl, user) {
   await page.waitForURL((u) => !u.pathname.startsWith('/signin'), { timeout: 30_000 });
 }
 
-/** Opens the home page and waits until React has hydrated the forms (so file inputs and buttons work). */
+/** Opens the new-check page and waits until React has hydrated the forms (so file inputs and buttons work). */
 export async function openHome(page, baseUrl) {
-  await page.goto(baseUrl);
+  await page.goto(`${baseUrl}/new`);
   await page.locator('[data-testid="upload-form"][data-ready]').waitFor({ timeout: 30_000 });
   await page.locator('[data-testid="profile-form"][data-ready]').waitFor({ timeout: 30_000 });
 }

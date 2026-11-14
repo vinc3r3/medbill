@@ -7,6 +7,7 @@ import { formatUsd, formatUsDate } from '@/lib/format';
 import { FLAG_LABELS, rowMarks } from '@/lib/review';
 import type { Case, Flag } from '@/lib/types';
 import { isReminderDue, reminderDate } from '@/lib/tracking';
+import { StatusChip } from '../../components/StatusChip';
 import { FlagBadge } from './FlagBadge';
 import { SimulateDeliveryButton } from './SimulateDeliveryButton';
 import { LetterEditor } from './LetterEditor';
@@ -32,10 +33,13 @@ function ReviewView({ c }: { c: Case }) {
   return (
     <>
       <header className="flex flex-col gap-1">
-        <Link href="/" className="text-sm underline">
-          ← Check another bill
+        <Link href="/dashboard" className="text-sm underline">
+          ← Dashboard
         </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">{c.bill.provider}</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight">{c.bill.provider}</h1>
+          <StatusChip status={c.status} />
+        </div>
         <p className="text-neutral-600 dark:text-neutral-400">
           Service date {formatUsDate(c.bill.serviceDate)} · {c.eob.insurer} · Claim {c.eob.claimId}
         </p>

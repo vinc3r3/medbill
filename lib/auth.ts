@@ -1,13 +1,16 @@
 // Who is signed in. Server only. Uses getClaims(), which verifies the session token instead of trusting
 // the cookie (getSession() alone must never be used for authorization).
+import { connection } from 'next/server';
 import { jsonError } from './http';
 import { createSessionClient } from './supabase/server';
 
 export type CurrentUser = { id: string; email: string | null };
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
-  // Outside the try: during prerendering Next rejects cookies() on purpose to mark this as dynamic,
-  // and that signal must propagate rather than be mistaken for "signed out".
+  // Outside the try: during prerendering Next rejects these on purpose to mark this as dynamic, and that
+  // signal must propagate rather than be mistaken for "signed out". connection() also makes it request-time,
+  // so the token-expiry check (Date.now()) never runs during prerendering.
+  await connection();
   const supabase = await createSessionClient();
   try {
     const { data, error } = await supabase.auth.getClaims();

@@ -6,10 +6,10 @@ import { useActionState } from 'react';
 import { signIn, signUp, type AuthState } from './actions';
 
 export function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
-  const next = useSearchParams().get('next') ?? '/';
+  const next = useSearchParams().get('next') ?? '/dashboard';
   const [state, action, pending] = useActionState<AuthState, FormData>(mode === 'signin' ? signIn : signUp, { error: null, email: '' });
   const isSignIn = mode === 'signin';
-  const other = `${isSignIn ? '/signup' : '/signin'}${next !== '/' ? `?next=${encodeURIComponent(next)}` : ''}`;
+  const other = `${isSignIn ? '/signup' : '/signin'}${next !== '/dashboard' ? `?next=${encodeURIComponent(next)}` : ''}`;
 
   return (
     <form action={action} className="flex w-full max-w-sm flex-col gap-4">

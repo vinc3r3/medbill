@@ -35,7 +35,7 @@ try {
     check(r.status() === 401, `${method} ${path} → ${r.status()}`);
   }
   const anonPage = await anon.newPage();
-  for (const path of ['/', `/cases/${FAKE_ID}`]) {
+  for (const path of ['/dashboard', '/new', '/settings', `/cases/${FAKE_ID}`]) {
     await anonPage.goto(BASE_URL + path);
     const u = new URL(anonPage.url());
     check(u.pathname === '/signin' && u.searchParams.get('next') === path, `page ${path} → ${u.pathname}${u.search}`);
@@ -49,14 +49,14 @@ try {
   await page.getByLabel('Email').fill(signupEmail);
   await page.getByLabel('Password').fill(signupPassword);
   await page.getByRole('button', { name: 'Create account' }).click();
-  await page.waitForURL((u) => u.pathname === '/', { timeout: 30_000 }).catch(() => {});
-  check(new URL(page.url()).pathname === '/', `sign-up lands on / (${new URL(page.url()).pathname})`);
+  await page.waitForURL((u) => u.pathname === '/dashboard', { timeout: 30_000 }).catch(() => {});
+  check(new URL(page.url()).pathname === '/dashboard', `sign-up lands on the dashboard (${new URL(page.url()).pathname})`);
   check((await page.getByTestId('user-email').textContent().catch(() => '')) === signupEmail, 'header shows the signed-in email');
 
   await page.getByRole('button', { name: 'Sign out' }).click();
   await page.waitForURL((u) => u.pathname === '/signin', { timeout: 15_000 }).catch(() => {});
-  await page.goto(`${BASE_URL}/`);
-  check(new URL(page.url()).pathname === '/signin', 'after sign-out, / redirects to /signin');
+  await page.goto(`${BASE_URL}/dashboard`);
+  check(new URL(page.url()).pathname === '/signin', 'after sign-out, /dashboard redirects to /signin');
 
   await page.getByLabel('Email').fill(signupEmail);
   await page.getByLabel('Password').fill('definitely-wrong');
@@ -70,7 +70,7 @@ try {
   await page.getByRole('button', { name: 'Sign in' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/signin'), { timeout: 30_000 }).catch(() => {});
   const after = new URL(page.url());
-  check(after.origin === new URL(BASE_URL).origin && after.pathname === '/', `sign-in works and ignores an off-site next= (${after.href})`);
+  check(after.origin === new URL(BASE_URL).origin && after.pathname === '/dashboard', `sign-in works and ignores an off-site next= (${after.href})`);
 
   // 3) Isolation: Alice's case is invisible to Bob
   console.log('isolation:');

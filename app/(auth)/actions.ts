@@ -11,7 +11,7 @@ function read(formData: FormData) {
   return {
     email: String(formData.get('email') ?? '').trim().toLowerCase(),
     password: String(formData.get('password') ?? ''),
-    next: safeNext(formData.get('next')),
+    next: safeNext(formData.get('next'), '/dashboard'),
   };
 }
 

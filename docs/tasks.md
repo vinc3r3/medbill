@@ -122,6 +122,8 @@ are verified by signature.
   for the profile and plan; consistent design, mobile-first.
   - Done when: every page works at 390px with no sideways scroll, has no console errors, and the full flow
     can be completed from the landing page.
+  - Also: after a change (e.g. delivered), navigating back to the dashboard briefly shows the prefetched
+    copy before it refreshes. Move mutations to server actions (or invalidate the router cache) to avoid it.
 
 - [ ] **19. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
   - Done when: the full demo runs three times in a row without a restart.
