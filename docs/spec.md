@@ -51,6 +51,13 @@ Matching is many-to-one: several bill lines may match the same EOB line (repeats
 
 **At most one line-level flag per bill line**, by precedence: `duplicate` > `not_on_eob` > `eob_says_zero`.
 
+Details (decided in Task 7):
+- Bill lines of $0 or less (payments, credits) never get a flag.
+- Two lines without a code count as duplicates only if their descriptions also match.
+- Description similarity = shared words ÷ words in the shorter description (so "CBC" matches
+  "Complete blood count (CBC)"). A line with both codes present matches on code only.
+- The case-level flag, when present, is listed first.
+
 **Case-level vs line-level:** compute line-level flags first. Let `excess = amountDue − totalPatientResponsibility`
 and `lineSum` = sum of line-level differences. Fire `over_patient_responsibility` only if `excess > $1` and
 `excess − lineSum > $1` (the gap isn't explained by line flags). When it fires, return it **together with**

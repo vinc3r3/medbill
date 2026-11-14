@@ -37,9 +37,11 @@ Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "D
     credits; Claude stays available via `EXTRACT_PROVIDER=claude`. Route also refuses text that still matches
     redaction patterns. Check: `npm run test:ai` (all lines and totals, not just totals). ~15s per call.
 
-- [ ] **7. Write the flag rules, tests first.** Pure `checkFlags(bill, eob)` behind `/api/check`.
+- [x] **7. Write the flag rules, tests first.** Pure `checkFlags(bill, eob)` behind `/api/check`.
   - Done when: tests pass — A gives 0 flags, B gives 1 `duplicate`, C gives `over_patient_responsibility`
     with a $367 difference.
+  - Note: also added `POST/GET /api/cases` (needed by `/api/check`). Edge-case decisions recorded in the spec.
+    `/api/check` refuses (409) once a case is sent.
 
 - [ ] **8. Build the review screen.** Bill and EOB lines side by side, flagged rows highlighted, a
   plain-language explanation per flag, and a "to question" total.
