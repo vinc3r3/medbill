@@ -93,9 +93,12 @@ are verified by signature.
     for now; Task 14's dashboard check covers the dashboard. Webhook: `npm run postgrid:webhook`; check:
     `npm run e2e:track`.
 
-- [ ] **14. Build the dashboard.** The signed-in user's cases with status chips and a total "money saved";
+- [x] **14. Build the dashboard.** The signed-in user's cases with status chips and a total "money saved";
   app navigation (dashboard, new check, settings).
   - Done when: after running case C, it shows `sent` and $367, and another user's cases never appear.
+  - Note: verified on Vercel (`npm run e2e:dashboard`), incl. `delivered` showing after delivery (Task 13's
+    check). Totals: in dispute / money saved (resolved) / to review. Upload flow moved to `/new`, profile also
+    on `/settings`, `/` → `/dashboard` until Task 18's landing page.
 
 - [ ] **15. Track replies.** The letter carries a case reference (e.g. `Ref: MB-7F3A`). On the case page,
   "I got a reply": the user uploads a photo of the provider's response, which goes through the same on-device
