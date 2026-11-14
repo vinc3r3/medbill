@@ -8,6 +8,9 @@ import { jsonError, readBody, serverError } from '@/lib/http';
 import { letterToHtml } from '@/lib/letter-html';
 import { MailError, mail, waitUntilAccepted } from '@/lib/mail';
 
+// Creating the letter + waiting for the provider's content checks takes ~10s.
+export const maxDuration = 60;
+
 const Contact = z.object({
   name: z.string().trim().min(1, 'Name is required.').max(80),
   addressLine1: z.string().trim().min(3, 'Street address is required.').max(100),

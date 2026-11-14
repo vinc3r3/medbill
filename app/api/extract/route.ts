@@ -8,6 +8,9 @@ import { ExtractError, extractDoc } from '@/lib/extract';
 import { EMPTY_PROFILE } from '@/lib/profile';
 import { redact } from '@/lib/redact';
 
+// AI calls take 5–20s, plus retries on transient errors.
+export const maxDuration = 120;
+
 const Body = z.object(
   {
     redactedText: z
@@ -35,8 +38,12 @@ export async function POST(request: Request) {
     return Response.json(await extractDoc(docType, redactedText));
   } catch (err) {
     if (err instanceof ExtractError) return error(422, err.message);
+    if (err instanceof GeminiApiError && err.status === 429 && /PerDay/i.test(err.message)) {
+      console.error('Gemini daily free-tier quota exhausted');
+      return error(429, "Today's free AI limit has been reached. Please try again tomorrow.");
+    }
     if (err instanceof Anthropic.RateLimitError || (err instanceof GeminiApiError && err.status === 429)) {
-      return error(429, 'The AI service is busy. Please try again in a minute.');
+      return error(429, 'The AI service is busy. Please wait a minute and try again.');
     }
     if (err instanceof GeminiApiError) {
       console.error(`Gemini API error ${err.status}: ${err.message}`);

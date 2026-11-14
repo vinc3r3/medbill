@@ -19,7 +19,16 @@ function jsonSchema(schema: z.ZodType): object {
 const SCHEMAS = { bill: jsonSchema(WIRE.bill), eob: jsonSchema(WIRE.eob) };
 
 export const callGemini: CallModel = async (docType, redactedText) => {
-  client ??= new GoogleGenAI({ apiKey: requireEnv('GEMINI_API_KEY') });
+  client ??= new GoogleGenAI({
+    apiKey: requireEnv('GEMINI_API_KEY'),
+    // Retry transient server errors ("model overloaded" 503 etc.) with backoff; without retryOptions the SDK
+    // makes a single attempt. 429 is NOT retried: free-tier quota windows are ~1 minute or a whole day, and
+    // every retry would spend more quota.
+    httpOptions: {
+      timeout: 40_000,
+      retryOptions: { attempts: 3, initialDelay: 1, maxDelay: 6, httpStatusCodes: [408, 500, 502, 503, 504] },
+    },
+  });
   const response = await client.models.generateContent({
     model: GEMINI_MODEL,
     contents: userMessage(docType, redactedText),
