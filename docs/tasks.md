@@ -2,9 +2,11 @@
 
 Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "Done when" check passes.
 
-- [ ] **1. Scaffold the app.** Next.js + TypeScript + Tailwind + Vitest; `lib/types.ts` from the spec;
+- [x] **1. Scaffold the app.** Next.js + TypeScript + Tailwind + Vitest; `lib/types.ts` from the spec;
   Supabase `cases` table matching `Case`; env loading from `.env.local`.
   - Done when: `npm run dev` shows the home page, and a test case saves and reads back.
+  - Note: Supabase new keys → env vars `SUPABASE_URL` + `SUPABASE_SECRET_KEY` (server only, no anon key).
+    Schema in `supabase/migrations/0001_cases.sql`; round-trip check is `npm run test:db`.
 
 - [ ] **2. Create sample data.** In `/samples/{a,b,c}`, a synthetic bill and EOB (PNG or PDF) plus
   `expected.json`, matching the sample table in the spec. Use invented names and addresses.
