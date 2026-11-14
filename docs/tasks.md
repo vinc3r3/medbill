@@ -75,12 +75,15 @@ are verified by signature.
   - Note: miss 2.5s → hit 146ms, 1 AI call (`npm run check:cache`). Also switched the default model to
     `gemini-3.5-flash-lite` (own free quota, ~1.5s, 6/6 samples exact); `gemini-3.5-flash` hit its 20/day cap.
 
-- [ ] **12. Add authentication.** Supabase Auth with email + password (email confirmation off for the demo).
+- [x] **12. Add authentication.** Supabase Auth with email + password (email confirmation off for the demo).
   Sign-up, sign-in, sign-out pages; `cases.user_id` (migration); every case route checks the signed-in user.
   `/api/mail-webhook` and the Stripe webhook stay public (signature-verified). The profile (name, DOB, member
   ID, address) stays in the browser only, as before.
   - Done when: signed-out requests to case routes get 401; user A gets 404 for user B's case; sign-up,
     sign-in and sign-out work on the deployed site.
+  - Note: checked on Vercel with `npm run e2e:auth` (all 7 routes 401 signed out; B gets 404 from every API
+    route). The case *page* shows the not-found UI with HTTP 200, because it streams (status is sent before
+    the lookup in `<Suspense>`); no data leaks. Needs `SUPABASE_PUBLISHABLE_KEY` + migration 0004.
 
 - [ ] **13. Track.** Handle PostGrid tracking events in `/api/mail-webhook`; set a reminder 30 days after sending;
   add a "Simulate delivery" button (test mode may not send tracking events).
