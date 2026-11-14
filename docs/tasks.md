@@ -43,9 +43,12 @@ Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "D
   - Note: also added `POST/GET /api/cases` (needed by `/api/check`). Edge-case decisions recorded in the spec.
     `/api/check` refuses (409) once a case is sent.
 
-- [ ] **8. Build the review screen.** Bill and EOB lines side by side, flagged rows highlighted, a
+- [x] **8. Build the review screen.** Bill and EOB lines side by side, flagged rows highlighted, a
   plain-language explanation per flag, and a "to question" total.
   - Done when: case C shows "$367 to question".
+  - Note: review lives at `/cases/[id]`; home page now runs the whole flow (read → redact → "Check my bill").
+    Sending is disabled until a profile is saved. Check: `npm run e2e:review` (also verifies no profile
+    value is in any `/api/extract` body, and no sideways scroll at 390px).
 
 - [ ] **9. Draft and edit the letter.** `/api/letter` drafts from the flags with placeholders; editable text
   area; placeholders filled in the browser on approval.

@@ -7,6 +7,7 @@ import { redact } from '@/lib/redact';
 import { DropZone } from './DropZone';
 import { OcrDebugPanel } from './OcrDebugPanel';
 import { RedactedView } from './RedactedView';
+import { SendForCheck } from './SendForCheck';
 
 type OcrState =
   | { kind: 'idle' }
@@ -87,7 +88,7 @@ export function UploadForm() {
           disabled={!ready}
           className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:bg-neutral-400"
         >
-          {reading ? 'Reading…' : 'Check my bill'}
+          {reading ? 'Reading…' : 'Read my documents'}
         </button>
         {reading && (
           <p role="status" className="text-sm text-neutral-600 dark:text-neutral-400">
@@ -107,6 +108,7 @@ export function UploadForm() {
         </p>
       )}
       {redacted && <RedactedView billText={redacted.bill} eobText={redacted.eob} />}
+      {redacted && <SendForCheck billText={redacted.bill} eobText={redacted.eob} profileReady={!isProfileEmpty(profile)} />}
       {ocr.kind === 'done' && <OcrDebugPanel billText={ocr.billText} eobText={ocr.eobText} />}
     </form>
   );

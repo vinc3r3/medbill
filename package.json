@@ -16,7 +16,8 @@
     "e2e:ocr": "node scripts/e2e-ocr.mjs",
     "samples:ocr": "node scripts/ocr-fixtures.mjs",
     "e2e:redact": "node scripts/e2e-redact.mjs",
-    "test:ai": "VITEST_INTEGRATION=1 vitest run tests/extract.integration.test.ts"
+    "test:ai": "VITEST_INTEGRATION=1 vitest run tests/extract.integration.test.ts",
+    "e2e:review": "node scripts/e2e-review.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

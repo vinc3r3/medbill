@@ -1,13 +1,10 @@
 // Flag rules (docs/spec.md, "Flag rules"). Pure: no I/O, no AI. All money is compared in cents.
+import { formatUsd, formatUsDate as usDate } from './format';
 import type { BillDoc, BillLine, EobDoc, EobLine, Flag } from './types';
 
 const cents = (n: number) => Math.round(n * 100);
 const dollars = (c: number) => c / 100;
-const usd = (c: number) => `$${(c / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const usDate = (iso: string) => {
-  const [y, m, d] = iso.split('-');
-  return y && m && d ? `${m}/${d}/${y}` : iso;
-};
+const usd = (c: number) => formatUsd(c / 100);
 
 const tokens = (s: string) => new Set(s.toLowerCase().match(/[a-z0-9]+/g) ?? []);
 

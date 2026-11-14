@@ -25,7 +25,7 @@ try {
       // naturalWidth > 0 means the image actually decoded, not just that the <img> exists.
       results[label] = await img.evaluate((el) => el.complete && el.naturalWidth > 0);
     }
-    const buttonEnabled = await page.getByRole('button', { name: 'Check my bill' }).isEnabled();
+    const buttonEnabled = await page.getByRole('button', { name: 'Read my documents' }).isEnabled();
     await page.screenshot({ path: join(OUT_DIR, `upload-${key}.png`), fullPage: true });
 
     const ok = results.Bill && results.EOB && buttonEnabled;

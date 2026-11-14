@@ -39,7 +39,7 @@ try {
   for (const key of ['a', 'b', 'c']) {
     await page.getByTestId('bill-input').setInputFiles(join('samples', key, `${key}-bill.png`));
     await page.getByTestId('eob-input').setInputFiles(join('samples', key, `${key}-eob.png`));
-    await page.getByRole('button', { name: 'Check my bill' }).click();
+    await page.getByRole('button', { name: 'Read my documents' }).click();
     await page.getByTestId('redacted-bill').waitFor({ timeout: 120_000 });
 
     const texts = { bill: await page.getByTestId('redacted-bill').textContent(), eob: await page.getByTestId('redacted-eob').textContent() };
