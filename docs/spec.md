@@ -88,13 +88,17 @@ Replace, case-insensitively, before any network call:
 | `POST /api/cases/:id/simulate-delivery` | none | status → `delivered` (demo only) |
 | `GET /api/cases` | none | `Case[]` |
 
-`/api/letter` and `/api/extract` must never receive profile values.
+`/api/letter` and `/api/extract` must never receive profile values. `/api/letter` uses no AI (template).
 
 ## Letter
 
 Plain, factual, polite. Includes: provider name, service date, claim ID, each flagged line with date,
 description and amounts, the EOB figure, the requested correction, and a request for an itemized bill.
 Placeholders: `{{PATIENT_NAME}}`, `{{MEMBER_ID}}`, `{{ADDRESS}}`. No legal claims.
+
+Generated from a fixed template (`lib/letter.ts`), not by AI (decided before Task 9): predictable wording,
+no invented claims, no AI cost. Includes the corrected total (`amountDue − savedAmount`). Edits in the browser
+are not saved to the server; placeholders are filled in the browser at approval.
 
 ## Lob
 

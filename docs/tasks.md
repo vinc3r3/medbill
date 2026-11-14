@@ -50,10 +50,12 @@ Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "D
     Sending is disabled until a profile is saved. Check: `npm run e2e:review` (also verifies no profile
     value is in any `/api/extract` body, and no sideways scroll at 390px).
 
-- [ ] **9. Draft and edit the letter.** `/api/letter` drafts from the flags with placeholders; editable text
+- [x] **9. Draft and edit the letter.** `/api/letter` drafts from the flags with placeholders; editable text
   area; placeholders filled in the browser on approval.
   - Done when: the letter cites dates, descriptions and amounts, and the `/api/letter` request holds no
     profile values.
+  - Note: letter is a fixed template (no AI), agreed with the user. Edits stay in the browser. Check:
+    `npm run e2e:letter` (request body is exactly `{ caseId }`).
 
 - [ ] **10. Send.** "Approve and send" calls `/api/send`, which creates a Lob certified letter (test key).
   - Done when: Lob returns a letter id and preview link, and the case status becomes `sent`.

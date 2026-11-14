@@ -6,6 +6,7 @@ import { formatUsd, formatUsDate } from '@/lib/format';
 import { FLAG_LABELS, rowMarks } from '@/lib/review';
 import type { Case, Flag } from '@/lib/types';
 import { FlagBadge } from './FlagBadge';
+import { LetterEditor } from './LetterEditor';
 import { BillTable, EobTable } from './LineTables';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -75,17 +76,8 @@ function ReviewView({ c }: { c: Case }) {
         <EobTable eob={c.eob} marks={marks.eob} totalsMarks={marks.totals} />
       </section>
 
-      {c.flags.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Task 9: draft the letter */}
-          <button
-            type="button"
-            disabled
-            className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:bg-neutral-400"
-          >
-            Draft a letter (coming next)
-          </button>
-        </div>
+      {c.flags.length > 0 && (c.status === 'checked' || c.status === 'letter_ready') && (
+        <LetterEditor caseId={c.id} initialLetter={c.letter} />
       )}
     </>
   );
