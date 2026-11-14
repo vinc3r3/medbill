@@ -19,8 +19,10 @@ Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "D
   - Note: images only (PNG/JPEG/WebP); PDFs aren't accepted since Tesseract can't read them directly.
     Check: `npm run e2e:upload` (drives local Chrome via playwright-core; needs `npm run dev` running).
 
-- [ ] **4. Add on-device OCR.** Tesseract.js in a web worker; show raw text in a debug panel.
+- [x] **4. Add on-device OCR.** Tesseract.js in a web worker; show raw text in a debug panel.
   - Done when: text appears for all samples, and no network request carries document text.
+  - Note: Tesseract worker, WASM core and English data are self-hosted from `public/tesseract` (copied on
+    `postinstall`, git-ignored), so OCR makes zero external requests. Check: `npm run e2e:ocr`.
 
 - [ ] **5. Add redaction.** Profile form saved in `localStorage`; apply the redaction rules from the spec;
   show a highlighted redacted view.
