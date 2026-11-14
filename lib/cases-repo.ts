@@ -10,7 +10,9 @@ export type CaseRow = {
   eob: EobDoc;
   flags: Flag[];
   letter: string | null;
-  lob_letter_id: string | null;
+  mail_letter_id: string | null;
+  preview_url: string | null;
+  sent_at: string | null;
   saved_amount: number | string; // Postgres numeric may arrive as a string
   created_at: string;
 };
@@ -23,20 +25,24 @@ export function rowToCase(row: CaseRow): Case {
     eob: row.eob,
     flags: row.flags ?? [],
     letter: row.letter,
-    lobLetterId: row.lob_letter_id,
+    mailLetterId: row.mail_letter_id,
+    previewUrl: row.preview_url,
+    sentAt: row.sent_at,
     savedAmount: Number(row.saved_amount),
     createdAt: row.created_at,
   };
 }
 
-type CasePatch = Partial<Pick<Case, 'status' | 'flags' | 'letter' | 'lobLetterId' | 'savedAmount'>>;
+type CasePatch = Partial<Pick<Case, 'status' | 'flags' | 'letter' | 'mailLetterId' | 'previewUrl' | 'sentAt' | 'savedAmount'>>;
 
 export function patchToRow(patch: CasePatch): Partial<CaseRow> {
   const row: Partial<CaseRow> = {};
   if (patch.status !== undefined) row.status = patch.status;
   if (patch.flags !== undefined) row.flags = patch.flags;
   if (patch.letter !== undefined) row.letter = patch.letter;
-  if (patch.lobLetterId !== undefined) row.lob_letter_id = patch.lobLetterId;
+  if (patch.mailLetterId !== undefined) row.mail_letter_id = patch.mailLetterId;
+  if (patch.previewUrl !== undefined) row.preview_url = patch.previewUrl;
+  if (patch.sentAt !== undefined) row.sent_at = patch.sentAt;
   if (patch.savedAmount !== undefined) row.saved_amount = patch.savedAmount;
   return row;
 }

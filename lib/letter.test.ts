@@ -15,7 +15,7 @@ function sampleCase(key: string): Case {
   const flags = checkFlags(exp.bill, exp.eob);
   return {
     id: '00000000-0000-4000-8000-000000000000', status: 'checked', bill: exp.bill, eob: exp.eob, flags,
-    letter: null, lobLetterId: null, savedAmount: savedAmount(flags), createdAt: '2026-11-14T00:00:00Z',
+    letter: null, mailLetterId: null, previewUrl: null, sentAt: null, savedAmount: savedAmount(flags), createdAt: '2026-11-14T00:00:00Z',
   };
 }
 const TODAY = '2026-11-14';

@@ -2,7 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { findProviderAddress } from '@/lib/address';
 import { postJson } from '@/lib/api-client';
+import { saveProviderAddress } from '@/lib/provider-address-store';
 import type { BillDoc, Case, EobDoc, Flag } from '@/lib/types';
 
 type Step = 'extract' | 'save' | 'check';
@@ -18,7 +20,20 @@ type State = { kind: 'idle' } | { kind: 'running'; step: Step } | { kind: 'error
  * Sends the redacted text (only) for extraction, saves the case, runs the flag rules,
  * then opens the review screen.
  */
-export function SendForCheck({ billText, eobText, profileReady }: { billText: string; eobText: string; profileReady: boolean }) {
+export function SendForCheck({
+  billText,
+  eobText,
+  rawBillText,
+  patientAddress,
+  profileReady,
+}: {
+  billText: string;
+  eobText: string;
+  /** Unredacted OCR text: used here in the browser only, to find the provider's mailing address. */
+  rawBillText: string;
+  patientAddress: string;
+  profileReady: boolean;
+}) {
   const router = useRouter();
   const [state, setState] = useState<State>({ kind: 'idle' });
   const running = state.kind === 'running';
@@ -34,6 +49,7 @@ export function SendForCheck({ billText, eobText, profileReady }: { billText: st
       step = 'save';
       setState({ kind: 'running', step });
       const created = await postJson<Case>('/api/cases', { bill, eob });
+      saveProviderAddress(created.id, findProviderAddress(rawBillText, [patientAddress]));
       step = 'check';
       setState({ kind: 'running', step });
       await postJson<Flag[]>('/api/check', { caseId: created.id });

@@ -8,7 +8,9 @@ const row: CaseRow = {
   eob: { insurer: 'Test Health', claimId: 'C1', lines: [], totalPatientResponsibility: 0 },
   flags: [],
   letter: null,
-  lob_letter_id: null,
+  mail_letter_id: null,
+  preview_url: null,
+  sent_at: null,
   saved_amount: '367.00',
   created_at: '2026-01-02T00:00:00Z',
 };
@@ -16,7 +18,8 @@ const row: CaseRow = {
 describe('rowToCase', () => {
   it('maps snake_case columns to the Case type and parses numeric strings', () => {
     const c = rowToCase(row);
-    expect(c.lobLetterId).toBeNull();
+    expect(c.mailLetterId).toBeNull();
+    expect(c.sentAt).toBeNull();
     expect(c.savedAmount).toBe(367);
     expect(c.createdAt).toBe('2026-01-02T00:00:00Z');
   });
@@ -24,6 +27,8 @@ describe('rowToCase', () => {
 
 describe('patchToRow', () => {
   it('only includes fields that were given', () => {
-    expect(patchToRow({ status: 'sent', lobLetterId: 'ltr_1' })).toEqual({ status: 'sent', lob_letter_id: 'ltr_1' });
+    expect(patchToRow({ status: 'sent', mailLetterId: 'letter_1', sentAt: '2026-11-14T00:00:00Z' })).toEqual({
+      status: 'sent', mail_letter_id: 'letter_1', sent_at: '2026-11-14T00:00:00Z',
+    });
   });
 });

@@ -3,7 +3,7 @@
 ## What we're building
 A hackathon MVP that catches overcharges on everyday medical bills and sends the dispute for the user.
 One working loop: upload a bill + EOB → redact personal details in the browser → AI extracts and matches
-lines → user reviews flags and edits a letter → approves → letter sent via Lob (test mode) → status tracked
+lines → user reviews flags and edits a letter → approves → letter sent via PostGrid (test mode) → status tracked
 on a dashboard.
 
 Full contract: @docs/spec.md
@@ -14,8 +14,8 @@ Task list and progress: @docs/tasks.md
 - Personal details (name, date of birth, member ID, address, account numbers) never reach the AI.
   OCR and redaction run in the browser; the server only receives redacted text.
 - Letters are drafted with placeholders (`{{PATIENT_NAME}}`, `{{MEMBER_ID}}`, `{{ADDRESS}}`).
-  The browser fills them in at approval; only Lob receives the filled letter.
-- Use the Lob TEST key only. No real mail is sent.
+  The browser fills them in at approval; only the mail provider receives the filled letter (not stored).
+- Use the PostGrid TEST key only (`test_…`). No real mail is sent.
 - Every AI call returns JSON that matches the types in `docs/spec.md`. Validate it; on invalid JSON,
   retry once, then show a readable error.
 - Flags are worded as questions to verify, never as accusations or legal advice.
@@ -27,7 +27,7 @@ Task list and progress: @docs/tasks.md
 - AI extraction with structured JSON output (server routes only): Gemini by default (free tier,
   `gemini-3.5-flash`), Claude (`claude-opus-5-5`) as an alternative. Switch with `EXTRACT_PROVIDER`.
 - Supabase Postgres, one `cases` table
-- Lob API for certified letters (test mode)
+- PostGrid Print & Mail API for certified letters (test mode), behind `lib/mail`
 - Vitest for unit tests
 
 ## Commands

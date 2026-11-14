@@ -76,8 +76,10 @@ function ReviewView({ c }: { c: Case }) {
         <EobTable eob={c.eob} marks={marks.eob} totalsMarks={marks.totals} />
       </section>
 
+      {c.mailLetterId && <SentPanel c={c} />}
+
       {c.flags.length > 0 && (c.status === 'checked' || c.status === 'letter_ready') && (
-        <LetterEditor caseId={c.id} initialLetter={c.letter} />
+        <LetterEditor caseId={c.id} initialLetter={c.letter} providerName={c.bill.provider} />
       )}
     </>
   );
@@ -96,5 +98,28 @@ function FlagCard({ n, flag }: { n: number; flag: Flag }) {
         </p>
       </div>
     </li>
+  );
+}
+
+function SentPanel({ c }: { c: Case }) {
+  const sentOn = c.sentAt ? new Date(c.sentAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
+  return (
+    <section
+      aria-label="Letter sent"
+      data-testid="sent-panel"
+      className="flex flex-col gap-2 rounded-xl border border-emerald-400 bg-emerald-50 p-5 dark:border-emerald-700 dark:bg-emerald-950/30"
+    >
+      <p className="text-lg font-semibold">
+        Letter sent by certified mail{sentOn ? ` on ${sentOn}` : ''}{' '}
+        <span className="text-sm font-normal text-neutral-600 dark:text-neutral-400">(test mode: not actually mailed)</span>
+      </p>
+      <p className="text-sm text-neutral-700 dark:text-neutral-300">
+        Status: <span data-testid="case-status" className="font-semibold">{c.status}</span> · Letter ID{' '}
+        <code className="text-xs">{c.mailLetterId}</code>
+      </p>
+      <a href={`/api/cases/${c.id}/preview`} target="_blank" rel="noopener" className="self-start text-sm font-medium underline">
+        View the letter as mailed (PDF)
+      </a>
+    </section>
   );
 }

@@ -26,7 +26,8 @@ export type Flag = {
 export type CaseStatus = 'uploaded' | 'checked' | 'letter_ready' | 'sent' | 'delivered' | 'resolved';
 export type Case = {
   id: string; status: CaseStatus; bill: BillDoc; eob: EobDoc; flags: Flag[];
-  letter: string | null; lobLetterId: string | null; savedAmount: number; createdAt: string;
+  letter: string | null; mailLetterId: string | null; previewUrl: string | null; sentAt: string | null;
+  savedAmount: number; createdAt: string;
 };
 ```
 
@@ -83,10 +84,11 @@ Replace, case-insensitively, before any network call:
 | `POST /api/cases` | `{ bill: BillDoc, eob: EobDoc }` | `Case` (status `uploaded`) |
 | `POST /api/check` | `{ caseId }` | `Flag[]` (status → `checked`) |
 | `POST /api/letter` | `{ caseId }` | `{ letter: string }` with placeholders (status → `letter_ready`) |
-| `POST /api/send` | `{ caseId, letterHtml, to, from }` | `{ lobLetterId, previewUrl }` (status → `sent`) |
-| `POST /api/lob-webhook` | Lob tracking event | updates `status` |
+| `POST /api/send` | `{ caseId, letterText, to, from }` | `{ mailLetterId, previewUrl }` (status → `sent`) |
+| `POST /api/mail-webhook` | PostGrid `letter.updated` event | updates `status` |
 | `POST /api/cases/:id/simulate-delivery` | none | status → `delivered` (demo only) |
 | `GET /api/cases` | none | `Case[]` |
+| `GET /api/cases/:id/preview` | none | redirect to a fresh PDF preview link (provider links expire) |
 
 `/api/letter` and `/api/extract` must never receive profile values. `/api/letter` uses no AI (template).
 
@@ -100,10 +102,22 @@ Generated from a fixed template (`lib/letter.ts`), not by AI (decided before Tas
 no invented claims, no AI cost. Includes the corrected total (`amountDue − savedAmount`). Edits in the browser
 are not saved to the server; placeholders are filled in the browser at approval.
 
-## Lob
+## Mail (PostGrid)
 
-Create a letter with `extra_services: 'certified'` using the test key. Store the returned id and preview
-URL on the case. Reminder date = sent date + 30 days.
+Mail provider is PostGrid Print & Mail (switched from Lob before Task 10; code sits behind `lib/mail`).
+Create a letter with `mailingClass: 'certified'` and `addressPlacement: 'insert_blank_page'` (addresses on
+their own cover page, so content never overlaps the envelope window) using the TEST key only (`test_…`;
+the code refuses any other key). Send an `Idempotency-Key` derived from the case + content so retries never
+create a second letter. PostGrid may cancel a letter a few seconds after creating it (content checks), so
+`/api/send` waits for the preview and only then marks the case `sent`.
+
+Store the letter id (`mailLetterId`), preview URL and `sentAt` on the case. Preview links expire, so
+`GET /api/cases/:id/preview` fetches a fresh one. Reminder date = `sentAt` + 30 days.
+
+The provider's mailing address is found in the raw OCR text in the browser (redaction removes street
+addresses before anything is sent) and confirmed by the user; the patient's address comes from the profile.
+
+PostGrid letter statuses: `ready` → `printing` → `processed_for_delivery` → `completed` (or `cancelled`).
 
 ## Sample cases (`/samples`)
 

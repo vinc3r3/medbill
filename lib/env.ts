@@ -2,7 +2,7 @@
 // Never log the values.
 
 const SERVER_VARS = ['SUPABASE_URL', 'SUPABASE_SECRET_KEY'] as const;
-type ServerVar = (typeof SERVER_VARS)[number] | 'ANTHROPIC_API_KEY' | 'GEMINI_API_KEY' | 'LOB_API_KEY';
+type ServerVar = (typeof SERVER_VARS)[number] | 'ANTHROPIC_API_KEY' | 'GEMINI_API_KEY' | 'POSTGRID_API_KEY';
 
 export function requireEnv(name: ServerVar): string {
   const value = process.env[name];

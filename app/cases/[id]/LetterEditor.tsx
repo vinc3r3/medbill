@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useProfile } from '@/app/hooks/useProfile';
 import { postJson } from '@/lib/api-client';
 import { PLACEHOLDERS, fillPlaceholders, type Placeholder } from '@/lib/letter';
+import { SendPanel } from './SendPanel';
 
 const PLACEHOLDER_HELP: Record<Placeholder, string> = {
   '{{PATIENT_NAME}}': 'your name',
@@ -22,7 +23,7 @@ type State =
  * Draft (from the server, with placeholders) → edit → approve. Approval fills the placeholders here in
  * the browser from the saved profile; edits are not saved to the server.
  */
-export function LetterEditor({ caseId, initialLetter }: { caseId: string; initialLetter: string | null }) {
+export function LetterEditor({ caseId, initialLetter, providerName }: { caseId: string; initialLetter: string | null; providerName: string }) {
   const profile = useProfile();
   const [state, setState] = useState<State>(
     initialLetter ? { kind: 'editing', draft: initialLetter, original: initialLetter } : { kind: 'none' },
@@ -75,19 +76,14 @@ export function LetterEditor({ caseId, initialLetter }: { caseId: string; initia
         >
           {state.filled}
         </pre>
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Task 10: Approve and send via Lob */}
-          <button type="button" disabled className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:bg-neutral-400">
-            Send by certified mail (coming next)
-          </button>
-          <button
-            type="button"
-            className="text-sm underline"
-            onClick={() => setState({ kind: 'editing', draft: state.draft, original: state.original })}
-          >
-            Edit again
-          </button>
-        </div>
+        <button
+          type="button"
+          className="self-start text-sm underline"
+          onClick={() => setState({ kind: 'editing', draft: state.draft, original: state.original })}
+        >
+          Edit again
+        </button>
+        <SendPanel caseId={caseId} providerName={providerName} filledLetter={state.filled} />
       </section>
     );
   }

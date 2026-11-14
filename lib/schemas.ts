@@ -54,7 +54,9 @@ export const CaseSchema = z.object({
   eob: EobDocSchema,
   flags: z.array(FlagSchema),
   letter: z.string().nullable(),
-  lobLetterId: z.string().nullable(),
+  mailLetterId: z.string().nullable(),
+  previewUrl: z.string().nullable(),
+  sentAt: z.string().nullable(),
   savedAmount: money,
   createdAt: z.string().min(1),
 });

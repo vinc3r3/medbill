@@ -47,6 +47,12 @@ const ID = String.raw`(?=[A-Za-z0-9-]*\d)[A-Za-z0-9][A-Za-z0-9-]{3,}`;
 const STREET_SUFFIX = 'St|Street|Ave|Avenue|Rd|Road|Ln|Lane|Dr|Drive|Blvd|Boulevard|Ct|Court|Pkwy|Parkway|Way|Pl|Place|Ter|Terrace|Cir|Circle|Hwy|Highway|Trl|Trail|Sq|Square';
 const UNIT = String.raw`(?:,?\s*(?:Apt|Suite|Ste|Unit|#)\.?\s*[A-Za-z0-9-]+)?`;
 const CITY_STATE_ZIP = String.raw`[A-Z][A-Za-z.' -]*,\s*[A-Z]{2}\s+\d{5}(?:-\d{4})?`;
+const STREET_ADDRESS = String.raw`\b\d{1,6}\s+(?:[A-Z0-9][A-Za-z0-9'.-]*\s+){0,4}(?:${STREET_SUFFIX})\b\.?${UNIT}(?:,?\s*${CITY_STATE_ZIP})?`;
+
+/** Street addresses (with unit and city/state/ZIP when present) found in text, in order. */
+export function findStreetAddresses(text: string): string[] {
+  return [...text.matchAll(new RegExp(STREET_ADDRESS, 'g'))].map((m) => m[0]);
+}
 
 const PATTERNS: Array<[RegExp, string]> = [
   [new RegExp(String.raw`\b(DOB|D\.O\.B\.?|Date\s+of\s+birth|Birth\s*date)(\s*[:#-]?\s*)${DATE}`, 'gi'), '$1$2[DOB]'],
@@ -54,7 +60,7 @@ const PATTERNS: Array<[RegExp, string]> = [
   [new RegExp(String.raw`\b(Account|Acct)(\.?\s*(?:#|No\.?|Number)?\s*[:#]?\s*)${ID}\b`, 'gi'), '$1$2[ACCOUNT]'],
   // Street address, optional unit, optional city/state/ZIP (same line or next line).
   [
-    new RegExp(String.raw`\b\d{1,6}\s+(?:[A-Z0-9][A-Za-z0-9'.-]*\s+){0,4}(?:${STREET_SUFFIX})\b\.?${UNIT}(?:,?\s*${CITY_STATE_ZIP})?`, 'g'),
+    new RegExp(STREET_ADDRESS, 'g'),
     '[ADDRESS]',
   ],
   [new RegExp(String.raw`\bP\.?\s*O\.?\s*Box\s+\d+(?:,?\s*${CITY_STATE_ZIP})?`, 'gi'), '[ADDRESS]'],

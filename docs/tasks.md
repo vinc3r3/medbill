@@ -57,10 +57,13 @@ Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "D
   - Note: letter is a fixed template (no AI), agreed with the user. Edits stay in the browser. Check:
     `npm run e2e:letter` (request body is exactly `{ caseId }`).
 
-- [ ] **10. Send.** "Approve and send" calls `/api/send`, which creates a Lob certified letter (test key).
-  - Done when: Lob returns a letter id and preview link, and the case status becomes `sent`.
+- [x] **10. Send.** "Approve and send" calls `/api/send`, which creates a PostGrid certified letter (test key).
+  - Done when: PostGrid returns a letter id and preview link, and the case status becomes `sent`.
+  - Note: switched from Lob to PostGrid (user's call); `lobLetterId` → `mailLetterId`, added `previewUrl`,
+    `sentAt` (migration 0002). Addresses on a cover page (else PostGrid auto-cancels); `/api/send` waits for
+    PostGrid's checks before marking `sent`. Check: `npm run e2e:send`.
 
-- [ ] **11. Track.** Handle Lob tracking events in `/api/lob-webhook`; set a reminder 30 days after sending;
+- [ ] **11. Track.** Handle PostGrid tracking events in `/api/mail-webhook`; set a reminder 30 days after sending;
   add a "Simulate delivery" button (test mode may not send tracking events).
   - Done when: a status change to `delivered` shows on the dashboard.
 

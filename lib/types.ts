@@ -23,5 +23,6 @@ export type Flag = {
 export type CaseStatus = 'uploaded' | 'checked' | 'letter_ready' | 'sent' | 'delivered' | 'resolved';
 export type Case = {
   id: string; status: CaseStatus; bill: BillDoc; eob: EobDoc; flags: Flag[];
-  letter: string | null; lobLetterId: string | null; savedAmount: number; createdAt: string;
+  letter: string | null; mailLetterId: string | null; previewUrl: string | null; sentAt: string | null;
+  savedAmount: number; createdAt: string;
 };

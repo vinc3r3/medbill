@@ -108,7 +108,15 @@ export function UploadForm() {
         </p>
       )}
       {redacted && <RedactedView billText={redacted.bill} eobText={redacted.eob} />}
-      {redacted && <SendForCheck billText={redacted.bill} eobText={redacted.eob} profileReady={!isProfileEmpty(profile)} />}
+      {redacted && ocr.kind === 'done' && (
+        <SendForCheck
+          billText={redacted.bill}
+          eobText={redacted.eob}
+          rawBillText={ocr.billText}
+          patientAddress={profile.address}
+          profileReady={!isProfileEmpty(profile)}
+        />
+      )}
       {ocr.kind === 'done' && <OcrDebugPanel billText={ocr.billText} eobText={ocr.eobText} />}
     </form>
   );
