@@ -21,7 +21,9 @@
     "e2e:letter": "node scripts/e2e-letter.mjs",
     "e2e:send": "node scripts/e2e-send.mjs",
     "check:cache": "node scripts/check-cache.mjs",
-    "e2e:auth": "node scripts/e2e-auth.mjs"
+    "e2e:auth": "node scripts/e2e-auth.mjs",
+    "postgrid:webhook": "node scripts/postgrid-webhook.mjs",
+    "e2e:track": "node scripts/e2e-track.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

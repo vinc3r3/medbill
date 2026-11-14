@@ -86,3 +86,13 @@ export async function deleteCase(id: string, userId: string): Promise<void> {
   const { error } = await db().from('cases').delete().eq('id', id).eq('user_id', userId);
   if (error) throw new Error(`Could not delete case: ${error.message}`);
 }
+
+/**
+ * For signature-verified webhooks only (no signed-in user): which case a mail-provider letter belongs to.
+ * Returns just what the webhook needs to update the status.
+ */
+export async function findCaseByMailLetterId(mailLetterId: string): Promise<{ id: string; userId: string; status: CaseStatus } | null> {
+  const { data, error } = await db().from('cases').select('id, user_id, status').eq('mail_letter_id', mailLetterId).maybeSingle();
+  if (error) throw new Error(`Could not look up letter: ${error.message}`);
+  return data ? { id: data.id, userId: data.user_id, status: data.status } : null;
+}

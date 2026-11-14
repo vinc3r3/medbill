@@ -6,7 +6,9 @@ import { getCase } from '@/lib/cases-repo';
 import { formatUsd, formatUsDate } from '@/lib/format';
 import { FLAG_LABELS, rowMarks } from '@/lib/review';
 import type { Case, Flag } from '@/lib/types';
+import { isReminderDue, reminderDate } from '@/lib/tracking';
 import { FlagBadge } from './FlagBadge';
+import { SimulateDeliveryButton } from './SimulateDeliveryButton';
 import { LetterEditor } from './LetterEditor';
 import { BillTable, EobTable } from './LineTables';
 
@@ -105,7 +107,11 @@ function FlagCard({ n, flag }: { n: number; flag: Flag }) {
 }
 
 function SentPanel({ c }: { c: Case }) {
-  const sentOn = c.sentAt ? new Date(c.sentAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
+  const fmt = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  const sentOn = c.sentAt ? fmt(c.sentAt) : null;
+  const followUp = reminderDate(c.sentAt);
+  const due = isReminderDue(c.sentAt, c.status);
+  const delivered = c.status === 'delivered' || c.status === 'resolved';
   return (
     <section
       aria-label="Letter sent"
@@ -113,16 +119,27 @@ function SentPanel({ c }: { c: Case }) {
       className="flex flex-col gap-2 rounded-xl border border-emerald-400 bg-emerald-50 p-5 dark:border-emerald-700 dark:bg-emerald-950/30"
     >
       <p className="text-lg font-semibold">
-        Letter sent by certified mail{sentOn ? ` on ${sentOn}` : ''}{' '}
+        {delivered ? 'Your letter was delivered' : 'Letter sent by certified mail'}
+        {sentOn ? ` · sent ${sentOn}` : ''}{' '}
         <span className="text-sm font-normal text-neutral-600 dark:text-neutral-400">(test mode: not actually mailed)</span>
       </p>
       <p className="text-sm text-neutral-700 dark:text-neutral-300">
         Status: <span data-testid="case-status" className="font-semibold">{c.status}</span> · Letter ID{' '}
         <code className="text-xs">{c.mailLetterId}</code>
       </p>
-      <a href={`/api/cases/${c.id}/preview`} target="_blank" rel="noopener" className="self-start text-sm font-medium underline">
-        View the letter as mailed (PDF)
-      </a>
+      {followUp && (
+        <p data-testid="reminder" className={`text-sm ${due ? 'font-semibold text-amber-800 dark:text-amber-300' : 'text-neutral-700 dark:text-neutral-300'}`}>
+          {due
+            ? `Follow up now: it's been 30 days since you sent the letter (${fmt(followUp)}).`
+            : `Reminder: if you haven't heard back by ${fmt(followUp)}, follow up with the billing office.`}
+        </p>
+      )}
+      <div className="flex flex-wrap items-center gap-4">
+        <a href={`/api/cases/${c.id}/preview`} target="_blank" rel="noopener" className="text-sm font-medium underline">
+          View the letter as mailed (PDF)
+        </a>
+        {c.status === 'sent' && <SimulateDeliveryButton caseId={c.id} />}
+      </div>
     </section>
   );
 }
