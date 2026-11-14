@@ -31,8 +31,11 @@ Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "D
     single name words are also redacted ("RIVERA, JORDAN"). Unit tests run on real OCR fixtures
     (`samples/*/*.ocr.txt`, from `npm run samples:ocr`); browser check: `npm run e2e:redact`.
 
-- [ ] **6. Extract with AI.** `/api/extract` sends redacted text to Claude and validates the JSON.
+- [x] **6. Extract with AI.** `/api/extract` sends redacted text to Claude and validates the JSON.
   - Done when: extracted totals match `expected.json` for all three cases.
+  - Note: provider is Gemini by default (`gemini-3.5-flash`, free tier) because the Anthropic account has no
+    credits; Claude stays available via `EXTRACT_PROVIDER=claude`. Route also refuses text that still matches
+    redaction patterns. Check: `npm run test:ai` (all lines and totals, not just totals). ~15s per call.
 
 - [ ] **7. Write the flag rules, tests first.** Pure `checkFlags(bill, eob)` behind `/api/check`.
   - Done when: tests pass — A gives 0 flags, B gives 1 `duplicate`, C gives `over_patient_responsibility`

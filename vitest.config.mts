@@ -6,7 +6,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['**/*.test.ts'],
-    // Integration tests hit real Supabase; run them only via `npm run test:db`.
-    exclude: ['node_modules/**', '.next/**', ...(process.env.VITEST_DB ? [] : ['**/*.integration.test.ts'])],
+    // Integration tests hit real services (Supabase, Claude); run them via `npm run test:db` / `npm run test:ai`.
+    exclude: ['node_modules/**', '.next/**', ...(process.env.VITEST_INTEGRATION ? [] : ['**/*.integration.test.ts'])],
   },
 });

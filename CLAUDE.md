@@ -24,7 +24,8 @@ Task list and progress: @docs/tasks.md
 ## Stack
 - Next.js (App Router) + TypeScript + Tailwind, mobile-friendly
 - Tesseract.js in a web worker for OCR (browser)
-- Claude API with structured JSON output (server routes only)
+- AI extraction with structured JSON output (server routes only): Gemini by default (free tier,
+  `gemini-3.5-flash`), Claude (`claude-opus-5-5`) as an alternative. Switch with `EXTRACT_PROVIDER`.
 - Supabase Postgres, one `cases` table
 - Lob API for certified letters (test mode)
 - Vitest for unit tests
