@@ -157,3 +157,13 @@ requires an active plan with a letter left this month.
 
 Running costs to keep in mind for live use: Supabase Pro ~$25/mo, Vercel Pro ~$20/mo (Hobby forbids
 commercial use), PostGrid ~$5–10 per certified letter, Stripe ~2.9% + 30¢ per charge.
+
+## Replies (Task 15)
+
+No API can read the user's own mailbox, so replies are logged on the case page: the user uploads the
+provider's response (same on-device OCR → redaction → extraction path as a bill) and picks an outcome:
+`corrected` | `denied` | `more_info`. A corrected statement is compared with the EOB; the case becomes
+`resolved` and `savedAmount` becomes the actual saving (`original amountDue − new amountDue`, never more than
+the amount questioned). Each letter carries a case reference (`Ref: MB-` + first 4 hex of the case id,
+uppercased) so any reply can be matched. Automatic options (reply-by-email address, virtual mailbox) are stretch.
+

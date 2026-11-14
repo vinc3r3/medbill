@@ -63,8 +63,8 @@ Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "D
     `sentAt` (migration 0002). Addresses on a cover page (else PostGrid auto-cancels); `/api/send` waits for
     PostGrid's checks before marking `sent`. Check: `npm run e2e:send`.
 
-Re-planned on 2026-11-15 (after deploying to Vercel): extraction cache, authentication, Stripe and a frontend
-pass were added. Auth comes before tracking because every later feature is per-user; webhooks stay public and
+Re-planned on 2026-11-15 (after deploying to Vercel): extraction cache, authentication, reply tracking, Stripe
+and a frontend pass were added. Auth comes before tracking because every later feature is per-user; webhooks stay public and
 are verified by signature.
 
 - [x] **11. Cache extraction results.** Store each validated extraction under a SHA-256 fingerprint of
@@ -90,21 +90,35 @@ are verified by signature.
   app navigation (dashboard, new check, settings).
   - Done when: after running case C, it shows `sent` and $367, and another user's cases never appear.
 
-- [ ] **15. Add Stripe (test mode).** Subscription via Stripe Checkout + Customer Portal; webhook keeps the
+- [ ] **15. Track replies.** The letter carries a case reference (e.g. `Ref: MB-7F3A`). On the case page,
+  "I got a reply": the user uploads a photo of the provider's response, which goes through the same on-device
+  OCR → redaction → extraction; the user picks the outcome (corrected / denied / more info needed). A corrected
+  bill is compared with the EOB; the case moves to `resolved` with the actual amount saved. No reply after 30
+  days → the reminder suggests a follow-up letter.
+  - Done when: for case C, uploading a corrected statement ($45 due) marks the case `resolved` with $367
+    saved, and the dashboard total uses actual savings for resolved cases.
+
+- [ ] **16. Add Stripe (test mode).** Subscription via Stripe Checkout + Customer Portal; webhook keeps the
   user's plan in sync. Sending a letter requires an active plan. Plan *to confirm*: $12/month including
   1 certified letter per month (each live certified letter costs ~$5–10 in postage and printing).
   - Done when: test card 4242… completes Checkout and the plan becomes active via webhook; sending is
     blocked without a plan; cancelling in the portal removes access.
 
-- [ ] **16. Frontend enhancement.** Landing page, app shell, case page with a tracking timeline, settings page
+- [ ] **17. Frontend enhancement.** Landing page, app shell, case page with a tracking timeline, settings page
   for the profile and plan; consistent design, mobile-first.
   - Done when: every page works at 390px with no sideways scroll, has no console errors, and the full flow
     can be completed from the landing page.
 
-- [ ] **17. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
+- [ ] **18. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
   - Done when: the full demo runs three times in a row without a restart.
 
 ## Stretch
 
-- [ ] **18. Import EOBs from the Flexpa sandbox** instead of uploading them.
-- [ ] **19. Send by email** from the user's Gmail as an alternative to mail.
+- [ ] **19. Import EOBs from the Flexpa sandbox** instead of uploading them.
+- [ ] **20. Send by email** from the user's Gmail as an alternative to mail.
+- [ ] **21. Reply-by-email address.** Each letter asks for replies at a unique address
+  (`case-<ref>@replies.<domain>`); an inbound-email webhook (Postmark/SendGrid/Mailgun) attaches replies to
+  the case automatically. Needs a domain and an email provider.
+- [ ] **22. Virtual mailbox.** Use a mail-scanning service as the reply address so paper replies are scanned
+  and attached automatically. Paid; real use needs the patient's consent as authorized representative
+  (HIPAA obligations).
