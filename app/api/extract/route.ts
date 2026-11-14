@@ -4,6 +4,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { ApiError as GeminiApiError } from '@google/genai';
 import { z } from 'zod';
+import { requireApiUser } from '@/lib/auth';
 import { ExtractError, extractDoc, extractModel, extractProvider } from '@/lib/extract';
 import { extractCached } from '@/lib/extract-cache';
 import { supabaseExtractionStore } from '@/lib/extractions-repo';
@@ -28,6 +29,9 @@ const Body = z.object(
 const error = (status: number, message: string) => Response.json({ error: message }, { status });
 
 export async function POST(request: Request) {
+  // Signed-in users only: also protects the AI quota from anonymous traffic.
+  const user = await requireApiUser();
+  if (user instanceof Response) return user;
   const body = Body.safeParse(await request.json().catch(() => null));
   if (!body.success) return error(400, body.error.issues[0]?.message ?? 'Invalid request.');
   const { redactedText, docType } = body.data;

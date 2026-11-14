@@ -1,4 +1,6 @@
+import { Suspense } from 'react';
 import { ProfileForm } from './components/ProfileForm';
+import { RequireUser } from './components/RequireUser';
 import { UploadForm } from './components/UploadForm';
 
 export default function Home() {
@@ -11,8 +13,12 @@ export default function Home() {
           worth a second look and help you ask about them.
         </p>
       </header>
-      <ProfileForm />
-      <UploadForm />
+      <Suspense fallback={<p className="text-neutral-600 dark:text-neutral-400">Loading…</p>}>
+        <RequireUser>
+          <ProfileForm />
+          <UploadForm />
+        </RequireUser>
+      </Suspense>
       <p className="text-sm text-neutral-500">Demo build. Uses synthetic sample documents only.</p>
     </main>
   );

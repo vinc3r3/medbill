@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useHydrated } from '@/app/hooks/useHydrated';
 import { useProfile } from '@/app/hooks/useProfile';
 import { isProfileEmpty, saveProfile, type Profile } from '@/lib/profile';
 
@@ -13,6 +14,7 @@ const FIELDS: Array<{ key: keyof Profile; label: string; type?: string; placehol
 
 export function ProfileForm() {
   const profile = useProfile();
+  const hydrated = useHydrated();
   const empty = isProfileEmpty(profile);
   const [message, setMessage] = useState<string | null>(null);
   // null = not chosen by the user yet: open while there are no saved details, collapsed once there are.
@@ -20,6 +22,8 @@ export function ProfileForm() {
 
   return (
     <details
+      data-testid="profile-form"
+      data-ready={hydrated || undefined}
       open={userOpen ?? empty}
       onToggle={(e) => setUserOpen(e.currentTarget.open)}
       className="rounded-xl border border-neutral-300 p-4 dark:border-neutral-700">

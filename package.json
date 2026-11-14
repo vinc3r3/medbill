@@ -20,11 +20,13 @@
     "e2e:review": "node scripts/e2e-review.mjs",
     "e2e:letter": "node scripts/e2e-letter.mjs",
     "e2e:send": "node scripts/e2e-send.mjs",
-    "check:cache": "node scripts/check-cache.mjs"
+    "check:cache": "node scripts/check-cache.mjs",
+    "e2e:auth": "node scripts/e2e-auth.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
     "@google/genai": "^3.3.0",
+    "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.0",
     "next": "16.4.6",
     "react": "19.3.0",

@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
+import { getCurrentUser } from '@/lib/auth';
 import { getCase } from '@/lib/cases-repo';
 import { formatUsd, formatUsDate } from '@/lib/format';
 import { FLAG_LABELS, rowMarks } from '@/lib/review';
@@ -14,8 +15,10 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function CaseReview({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   await connection(); // always read the latest case
+  const user = await getCurrentUser();
+  if (!user) redirect(`/signin?next=${encodeURIComponent(`/cases/${id}`)}`);
   if (!UUID.test(id)) notFound();
-  const found = await getCase(id);
+  const found = await getCase(id, user.id); // someone else's case → 404, same as a missing one
   if (!found) notFound();
   return <ReviewView c={found} />;
 }

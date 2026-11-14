@@ -3,11 +3,10 @@
 // Creates cases B and C from expected.json via the API (no AI calls) and deletes them afterwards.
 // Usage: start the app (`npm run dev`), then `npm run e2e:letter`. Screenshots go to OUT_DIR (default .e2e).
 import { mkdirSync, readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
+import { createTestUser, deleteTestUser, signIn } from './e2e-helpers.mjs';
 
-const require = createRequire(import.meta.url);
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const OUT_DIR = process.env.OUT_DIR ?? '.e2e';
 mkdirSync(OUT_DIR, { recursive: true });
@@ -15,9 +14,10 @@ const profile = JSON.parse(readFileSync('samples/profile.json', 'utf8'));
 const [mm, dd, yyyy] = profile.dateOfBirth.split('/');
 const usd = (n) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const us = (iso) => { const [y, m, d] = iso.split('-'); return `${m}/${d}/${y}`; };
-const post = (p, b) => fetch(BASE_URL + p, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then((r) => r.json());
+let post; // set once signed in, so API calls carry the session cookie
 
 const browser = await chromium.launch({ channel: 'chrome' });
+const user = await createTestUser('letter');
 const created = [];
 let failures = 0;
 const fail = (msg) => { failures++; console.log(`  FAIL ${msg}`); };
@@ -25,6 +25,8 @@ const fail = (msg) => { failures++; console.log(`  FAIL ${msg}`); };
 try {
   const context = await browser.newContext({ viewport: { width: 1100, height: 1000 } });
   const page = await context.newPage();
+  await signIn(page, BASE_URL, user);
+  post = (p, b) => page.request.post(BASE_URL + p, { data: b }).then((r) => r.json());
   const letterRequests = [];
   context.on('request', (r) => { if (r.url().includes('/api/letter')) letterRequests.push(r.postData() ?? ''); });
 
@@ -66,7 +68,7 @@ try {
     for (const v of [profile.name, profile.memberId, profile.address]) if (!final.includes(v)) fail(`case ${key}: approved letter lacks "${v}"`);
     if (!final.includes('I can also be reached by mail.')) fail(`case ${key}: edit lost on approval`);
 
-    const stored = (await (await fetch(`${BASE_URL}/api/cases`)).json()).find((x) => x.id === c.id);
+    const stored = (await (await page.request.get(`${BASE_URL}/api/cases`)).json()).find((x) => x.id === c.id);
     console.log(`case ${key}: draft ${draft.split('\n').length} lines, ${must.length} facts cited, approved & filled, status=${stored.status}`);
     if (stored.status !== 'letter_ready') fail(`case ${key}: status ${stored.status}, expected letter_ready`);
     if (/Jordan|Rivera|XKH448210937|Maple Grove/i.test(stored.letter ?? '')) fail(`case ${key}: stored letter contains profile values`);
@@ -82,12 +84,8 @@ try {
   console.log(`${letterRequests.length} /api/letter request(s): body is only { caseId }`);
 } finally {
   await browser.close();
-  if (created.length) {
-    require('@next/env').loadEnvConfig(process.cwd(), true);
-    const db = require('@supabase/supabase-js').createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } });
-    const { error, count } = await db.from('cases').delete({ count: 'exact' }).in('id', created);
-    console.log(error ? `cleanup failed: ${error.message}` : `cleanup: deleted ${count} test case(s)`);
-  }
+  await deleteTestUser(user); // removes the user's cases too
+  console.log(`cleanup: deleted test user and ${created.length} case(s)`);
 }
 console.log(failures ? `${failures} check(s) failed` : 'all checks passed');
 process.exit(failures ? 1 : 0);

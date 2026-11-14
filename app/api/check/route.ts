@@ -1,6 +1,7 @@
 // POST /api/check — { caseId } → Flag[]  (status → "checked")
 // Runs the pure flag rules (lib/flags.ts) on the stored bill and EOB. No AI involved.
 import { z } from 'zod';
+import { requireApiUser } from '@/lib/auth';
 import { getCase, updateCase } from '@/lib/cases-repo';
 import { checkFlags, savedAmount } from '@/lib/flags';
 import { jsonError, readBody, serverError } from '@/lib/http';
@@ -14,15 +15,17 @@ const Body = z.object(
 const LOCKED = new Set(['sent', 'delivered', 'resolved']);
 
 export async function POST(request: Request) {
+  const user = await requireApiUser();
+  if (user instanceof Response) return user;
   const body = await readBody(request, Body);
   if (body instanceof Response) return body;
   try {
-    const found = await getCase(body.caseId);
+    const found = await getCase(body.caseId, user.id);
     if (!found) return jsonError(404, "We couldn't find that case.");
     if (LOCKED.has(found.status)) return jsonError(409, 'This case has already been sent, so it can no longer be re-checked.');
 
     const flags = checkFlags(found.bill, found.eob);
-    await updateCase(found.id, { flags, savedAmount: savedAmount(flags), status: 'checked' });
+    await updateCase(found.id, user.id, { flags, savedAmount: savedAmount(flags), status: 'checked' });
     return Response.json(flags);
   } catch (err) {
     return serverError(err, "We couldn't check your case. Please try again.");

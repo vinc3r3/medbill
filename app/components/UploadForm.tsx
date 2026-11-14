@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useHydrated } from '@/app/hooks/useHydrated';
 import { useProfile } from '@/app/hooks/useProfile';
 import { isProfileEmpty } from '@/lib/profile';
 import { redact } from '@/lib/redact';
@@ -24,6 +25,7 @@ export function UploadForm() {
   const reading = ocr.kind === 'reading';
   const ready = bill !== null && eob !== null && !reading;
   const profile = useProfile();
+  const hydrated = useHydrated();
 
   // Redacted text is derived, so it updates as soon as the profile is saved or changed.
   const redacted = useMemo(
@@ -52,6 +54,8 @@ export function UploadForm() {
 
   return (
     <form
+      data-testid="upload-form"
+      data-ready={hydrated || undefined}
       className="flex flex-col gap-6"
       onSubmit={(e) => {
         e.preventDefault();

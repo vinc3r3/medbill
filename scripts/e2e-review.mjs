@@ -4,11 +4,10 @@
 // Usage: start the app (`npm run dev`), then `npm run e2e:review`. Needs the AI key and Supabase in .env.local.
 // Deletes the cases it creates. Screenshots go to OUT_DIR (default .e2e).
 import { mkdirSync, readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
+import { createTestUser, deleteTestUser, openHome, signIn } from './e2e-helpers.mjs';
 
-const require = createRequire(import.meta.url);
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const OUT_DIR = process.env.OUT_DIR ?? '.e2e';
 const CASES = (process.env.CASES ?? 'a,b,c').split(',');
@@ -22,6 +21,7 @@ const needles = [...Object.values(profile), 'Jordan', 'Rivera', '1427 Maple Grov
 const EXPECT = { a: { total: 'Nothing to question', rows: 0 }, b: { total: '$28.75 to question', rows: 2 }, c: { total: '$367 to question', rows: 2 } };
 
 const browser = await chromium.launch({ channel: 'chrome' });
+const user = await createTestUser('review');
 const created = [];
 let failures = 0;
 const fail = (msg) => { failures++; console.log(`  FAIL ${msg}`); };
@@ -29,10 +29,11 @@ const fail = (msg) => { failures++; console.log(`  FAIL ${msg}`); };
 try {
   const context = await browser.newContext({ viewport: { width: 1280, height: 1000 } });
   const page = await context.newPage();
+  await signIn(page, BASE_URL, user);
   const extractBodies = [];
   context.on('request', (r) => { if (r.url().includes('/api/extract')) extractBodies.push(r.postData() ?? ''); });
 
-  await page.goto(BASE_URL);
+  await openHome(page, BASE_URL);
   await page.getByLabel('Full name').fill(profile.name);
   await page.getByLabel('Date of birth').fill(`${yyyy}-${mm}-${dd}`);
   await page.getByLabel('Insurance member ID').fill(profile.memberId);
@@ -41,7 +42,7 @@ try {
   await page.getByText('Saved on this device.').waitFor();
 
   for (const key of CASES) {
-    await page.goto(BASE_URL);
+    await openHome(page, BASE_URL);
     await page.getByTestId('bill-input').setInputFiles(join('samples', key, `${key}-bill.png`));
     await page.getByTestId('eob-input').setInputFiles(join('samples', key, `${key}-eob.png`));
     await page.getByRole('button', { name: 'Read my documents' }).click();
@@ -77,13 +78,8 @@ try {
   await page.screenshot({ path: join(OUT_DIR, 'review-mobile.png'), fullPage: true });
 } finally {
   await browser.close();
-  if (created.length) {
-    require('@next/env').loadEnvConfig(process.cwd(), true);
-    const { createClient } = require('@supabase/supabase-js');
-    const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } });
-    const { error, count } = await db.from('cases').delete({ count: 'exact' }).in('id', created);
-    console.log(error ? `cleanup failed: ${error.message}` : `cleanup: deleted ${count} test case(s)`);
-  }
+  await deleteTestUser(user); // removes the user's cases too
+  console.log(`cleanup: deleted test user and ${created.length} case(s)`);
 }
 console.log(failures ? `${failures} check(s) failed` : 'all checks passed');
 process.exit(failures ? 1 : 0);

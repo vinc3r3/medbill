@@ -1,7 +1,7 @@
 // Server-side env access. Next.js loads .env.local automatically for `dev` and `build`.
 // Never log the values.
 
-const SERVER_VARS = ['SUPABASE_URL', 'SUPABASE_SECRET_KEY'] as const;
+const SERVER_VARS = ['SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'SUPABASE_PUBLISHABLE_KEY'] as const;
 type ServerVar = (typeof SERVER_VARS)[number] | 'ANTHROPIC_API_KEY' | 'GEMINI_API_KEY' | 'POSTGRID_API_KEY';
 
 export function requireEnv(name: ServerVar): string {

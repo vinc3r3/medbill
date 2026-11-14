@@ -4,6 +4,7 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
+import { createTestUser, deleteTestUser, openHome, signIn } from './e2e-helpers.mjs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const OUT_DIR = process.env.OUT_DIR ?? '.e2e';
@@ -14,13 +15,15 @@ const squash = (s) => s.toLowerCase().replace(/[\s.,]+/g, ' ');
 const needles = [...Object.values(profile), 'Jordan', 'Rivera', '1427 Maple Grove', `${yyyy}-${mm}-${dd}`];
 
 const browser = await chromium.launch({ channel: 'chrome' });
+const user = await createTestUser('redact');
 let failures = 0;
 const fail = (msg) => { failures++; console.log(`  FAIL ${msg}`); };
 
 try {
   const context = await browser.newContext({ viewport: { width: 1100, height: 1400 } });
   const page = await context.newPage();
-  await page.goto(BASE_URL);
+  await signIn(page, BASE_URL, user);
+  await openHome(page, BASE_URL);
 
   // Save the profile through the form (the date input takes YYYY-MM-DD).
   await page.getByLabel('Full name').fill(profile.name);
@@ -32,6 +35,7 @@ try {
 
   // Survives a reload (localStorage).
   await page.reload();
+  await page.locator('[data-testid="profile-form"][data-ready]').waitFor({ timeout: 30_000 });
   const summary = await page.locator('summary', { hasText: 'Your details' }).textContent();
   if (!summary.includes(profile.name)) fail('profile not restored after reload');
   else console.log('profile: saved and restored after reload');
@@ -58,6 +62,7 @@ try {
   }
 } finally {
   await browser.close();
+  await deleteTestUser(user);
 }
 console.log(failures ? `${failures} check(s) failed` : 'all checks passed');
 process.exit(failures ? 1 : 0);

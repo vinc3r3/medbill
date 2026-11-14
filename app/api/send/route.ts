@@ -3,6 +3,7 @@
 // through here to the provider and is not stored; the case keeps only the placeholder draft.
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
+import { requireApiUser } from '@/lib/auth';
 import { getCase, updateCase } from '@/lib/cases-repo';
 import { jsonError, readBody, serverError } from '@/lib/http';
 import { letterToHtml } from '@/lib/letter-html';
@@ -36,10 +37,12 @@ const Body = z.object(
 );
 
 export async function POST(request: Request) {
+  const user = await requireApiUser();
+  if (user instanceof Response) return user;
   const body = await readBody(request, Body);
   if (body instanceof Response) return body;
   try {
-    const found = await getCase(body.caseId);
+    const found = await getCase(body.caseId, user.id);
     if (!found) return jsonError(404, "We couldn't find that case.");
     if (found.status !== 'letter_ready') {
       return jsonError(409, found.mailLetterId ? 'This letter has already been sent.' : 'Draft and approve the letter first.');
@@ -60,7 +63,7 @@ export async function POST(request: Request) {
       return jsonError(422, `The mail service couldn't print this letter: ${letter.cancelledReason}`);
     }
 
-    await updateCase(found.id, { status: 'sent', mailLetterId: letter.id, previewUrl: letter.previewUrl, sentAt: new Date().toISOString() });
+    await updateCase(found.id, user.id, { status: 'sent', mailLetterId: letter.id, previewUrl: letter.previewUrl, sentAt: new Date().toISOString() });
     return Response.json({ mailLetterId: letter.id, previewUrl: letter.previewUrl });
   } catch (err) {
     if (err instanceof MailError) return jsonError(err.status, err.message);

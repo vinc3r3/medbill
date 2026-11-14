@@ -1,10 +1,12 @@
-// Data access for the `cases` table. Server only (uses the Supabase secret key).
+// Data access for the `cases` table. Server only (uses the Supabase secret key, which bypasses RLS), so
+// every user-facing function takes the signed-in user's id and filters by it.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { requireEnv } from './env';
 import type { BillDoc, Case, CaseStatus, EobDoc, Flag } from './types';
 
 export type CaseRow = {
   id: string;
+  user_id?: string; // never exposed in Case
   status: CaseStatus;
   bill: BillDoc;
   eob: EobDoc;
@@ -55,31 +57,32 @@ function db(): SupabaseClient {
   return client;
 }
 
-export async function createCase(bill: BillDoc, eob: EobDoc): Promise<Case> {
-  const { data, error } = await db().from('cases').insert({ bill, eob }).select().single();
+export async function createCase(userId: string, bill: BillDoc, eob: EobDoc): Promise<Case> {
+  const { data, error } = await db().from('cases').insert({ user_id: userId, bill, eob }).select().single();
   if (error) throw new Error(`Could not save case: ${error.message}`);
   return rowToCase(data as CaseRow);
 }
 
-export async function getCase(id: string): Promise<Case | null> {
-  const { data, error } = await db().from('cases').select().eq('id', id).maybeSingle();
+/** The case if it exists AND belongs to this user; otherwise null (callers answer 404 either way). */
+export async function getCase(id: string, userId: string): Promise<Case | null> {
+  const { data, error } = await db().from('cases').select().eq('id', id).eq('user_id', userId).maybeSingle();
   if (error) throw new Error(`Could not load case: ${error.message}`);
   return data ? rowToCase(data as CaseRow) : null;
 }
 
-export async function listCases(): Promise<Case[]> {
-  const { data, error } = await db().from('cases').select().order('created_at', { ascending: false });
+export async function listCases(userId: string): Promise<Case[]> {
+  const { data, error } = await db().from('cases').select().eq('user_id', userId).order('created_at', { ascending: false });
   if (error) throw new Error(`Could not list cases: ${error.message}`);
   return (data as CaseRow[]).map(rowToCase);
 }
 
-export async function updateCase(id: string, patch: CasePatch): Promise<Case> {
-  const { data, error } = await db().from('cases').update(patchToRow(patch)).eq('id', id).select().single();
+export async function updateCase(id: string, userId: string, patch: CasePatch): Promise<Case> {
+  const { data, error } = await db().from('cases').update(patchToRow(patch)).eq('id', id).eq('user_id', userId).select().single();
   if (error) throw new Error(`Could not update case: ${error.message}`);
   return rowToCase(data as CaseRow);
 }
 
-export async function deleteCase(id: string): Promise<void> {
-  const { error } = await db().from('cases').delete().eq('id', id);
+export async function deleteCase(id: string, userId: string): Promise<void> {
+  const { error } = await db().from('cases').delete().eq('id', id).eq('user_id', userId);
   if (error) throw new Error(`Could not delete case: ${error.message}`);
 }

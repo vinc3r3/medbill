@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
+import { createTestUser, deleteTestUser, openHome, signIn } from './e2e-helpers.mjs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const host = new URL(BASE_URL).host; // compare host so ws://localhost:3000 (dev reload) counts as ours
@@ -21,6 +22,7 @@ function needlesFor(expected) {
 }
 
 const browser = await chromium.launch({ channel: 'chrome' });
+const user = await createTestUser('ocr');
 let failures = 0;
 const fail = (msg) => { failures++; console.log(`  FAIL ${msg}`); };
 
@@ -34,7 +36,8 @@ try {
     const page = await context.newPage();
     page.on('websocket', (ws) => ws.on('framesent', (f) => sent.push({ host: new URL(ws.url()).host, where: `ws ${ws.url()}`, data: String(f.payload) })));
 
-    await page.goto(BASE_URL);
+    await signIn(page, BASE_URL, user);
+    await openHome(page, BASE_URL);
     await page.getByTestId('bill-input').setInputFiles(join('samples', key, `${key}-bill.png`));
     await page.getByTestId('eob-input').setInputFiles(join('samples', key, `${key}-eob.png`));
     const started = Date.now();
@@ -65,6 +68,7 @@ try {
   }
 } finally {
   await browser.close();
+  await deleteTestUser(user);
 }
 console.log(failures ? `${failures} check(s) failed` : 'all checks passed');
 process.exit(failures ? 1 : 0);

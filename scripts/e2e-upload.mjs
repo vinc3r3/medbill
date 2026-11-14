@@ -4,17 +4,21 @@
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
+import { createTestUser, deleteTestUser, openHome, signIn } from './e2e-helpers.mjs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const OUT_DIR = process.env.OUT_DIR ?? '.e2e';
 mkdirSync(OUT_DIR, { recursive: true });
 
 const browser = await chromium.launch({ channel: 'chrome' });
+const user = await createTestUser('upload');
+const context = await browser.newContext({ viewport: { width: 1100, height: 1000 } });
+await signIn(await context.newPage(), BASE_URL, user);
 let failures = 0;
 try {
   for (const key of ['a', 'b', 'c']) {
-    const page = await browser.newPage({ viewport: { width: 1100, height: 1000 } });
-    await page.goto(BASE_URL);
+    const page = await context.newPage();
+    await openHome(page, BASE_URL);
     await page.getByTestId('bill-input').setInputFiles(join('samples', key, `${key}-bill.png`));
     await page.getByTestId('eob-input').setInputFiles(join('samples', key, `${key}-eob.png`));
 
@@ -35,8 +39,8 @@ try {
   }
 
   // Wrong file type shows a readable error and no preview.
-  const page = await browser.newPage();
-  await page.goto(BASE_URL);
+  const page = await context.newPage();
+  await openHome(page, BASE_URL);
   await page.getByTestId('bill-input').setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hi') });
   const alert = await page.getByRole('alert').filter({ hasText: 'supported image' }).textContent({ timeout: 5000 });
   const rejected = /isn't a supported image/.test(alert ?? '') && (await page.getByAltText('Bill preview').count()) === 0;
@@ -44,5 +48,6 @@ try {
   console.log(`wrong file type: ${rejected ? 'rejected with message' : 'NOT REJECTED'}`);
 } finally {
   await browser.close();
+  await deleteTestUser(user);
 }
 process.exit(failures ? 1 : 0);
