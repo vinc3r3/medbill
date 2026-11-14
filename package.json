@@ -19,7 +19,8 @@
     "test:ai": "VITEST_INTEGRATION=1 vitest run tests/extract.integration.test.ts",
     "e2e:review": "node scripts/e2e-review.mjs",
     "e2e:letter": "node scripts/e2e-letter.mjs",
-    "e2e:send": "node scripts/e2e-send.mjs"
+    "e2e:send": "node scripts/e2e-send.mjs",
+    "check:cache": "node scripts/check-cache.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

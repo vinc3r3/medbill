@@ -4,7 +4,9 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { ApiError as GeminiApiError } from '@google/genai';
 import { z } from 'zod';
-import { ExtractError, extractDoc } from '@/lib/extract';
+import { ExtractError, extractDoc, extractModel, extractProvider } from '@/lib/extract';
+import { extractCached } from '@/lib/extract-cache';
+import { supabaseExtractionStore } from '@/lib/extractions-repo';
 import { EMPTY_PROFILE } from '@/lib/profile';
 import { redact } from '@/lib/redact';
 
@@ -35,7 +37,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    return Response.json(await extractDoc(docType, redactedText));
+    const store = supabaseExtractionStore({ provider: extractProvider(), model: extractModel() });
+    const { doc, cached } = await extractCached(docType, redactedText, { store, extract: extractDoc });
+    return Response.json(doc, { headers: { 'x-extract-cache': cached ? 'hit' : 'miss' } });
   } catch (err) {
     if (err instanceof ExtractError) return error(422, err.message);
     if (err instanceof GeminiApiError && err.status === 429 && /PerDay/i.test(err.message)) {

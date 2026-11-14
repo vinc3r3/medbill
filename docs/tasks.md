@@ -67,11 +67,13 @@ Re-planned on 2026-11-15 (after deploying to Vercel): extraction cache, authenti
 pass were added. Auth comes before tracking because every later feature is per-user; webhooks stay public and
 are verified by signature.
 
-- [ ] **11. Cache extraction results.** Store each validated extraction under a SHA-256 fingerprint of
+- [x] **11. Cache extraction results.** Store each validated extraction under a SHA-256 fingerprint of
   `docType` + redacted text (`extractions` table, migration 0003). Same document → no second AI call.
   Needed because Gemini's free tier allows 5 requests/min and 20/day.
   - Done when: unit tests pass, and running the same sample twice makes one AI call; the second
     extraction is answered from the cache in under 1 second.
+  - Note: miss 2.5s → hit 146ms, 1 AI call (`npm run check:cache`). Also switched the default model to
+    `gemini-3.5-flash-lite` (own free quota, ~1.5s, 6/6 samples exact); `gemini-3.5-flash` hit its 20/day cap.
 
 - [ ] **12. Add authentication.** Supabase Auth with email + password (email confirmation off for the demo).
   Sign-up, sign-in, sign-out pages; `cases.user_id` (migration); every case route checks the signed-in user.

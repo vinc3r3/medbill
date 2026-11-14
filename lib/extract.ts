@@ -1,8 +1,8 @@
 // AI extraction of BillDoc / EobDoc from redacted OCR text. Server only.
 // The model sees redacted text only; output is validated against lib/schemas.ts, with one retry.
 // Provider: EXTRACT_PROVIDER=gemini (default) or claude.
-import { callClaude } from './extract-claude';
-import { callGemini } from './extract-gemini';
+import { CLAUDE_MODEL, callClaude } from './extract-claude';
+import { GEMINI_MODEL, callGemini } from './extract-gemini';
 import { ExtractError, type CallModel, type DocType } from './extract-prompt';
 import { BillDocSchema, EobDocSchema } from './schemas';
 import type { BillDoc, EobDoc } from './types';
@@ -14,6 +14,9 @@ export type ExtractProvider = 'gemini' | 'claude';
 export function extractProvider(): ExtractProvider {
   return process.env.EXTRACT_PROVIDER === 'claude' ? 'claude' : 'gemini';
 }
+/** Model name for the active provider (recorded with cached extractions). */
+export const extractModel = () => (extractProvider() === 'claude' ? CLAUDE_MODEL : GEMINI_MODEL);
+
 const defaultCall: CallModel = (docType, text) => (extractProvider() === 'claude' ? callClaude : callGemini)(docType, text);
 
 const STRICT = { bill: BillDocSchema, eob: EobDocSchema } as const;

@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { requireEnv } from './env';
 import { ExtractError, SYSTEM_PROMPT, WIRE, userMessage, type CallModel } from './extract-prompt';
 
-export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 
 let client: GoogleGenAI | null = null;
 

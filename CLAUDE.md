@@ -27,7 +27,7 @@ Task list and progress: @docs/tasks.md
 - Next.js (App Router) + TypeScript + Tailwind, mobile-friendly
 - Tesseract.js in a web worker for OCR (browser)
 - AI extraction with structured JSON output (server routes only): Gemini by default (free tier,
-  `gemini-3.5-flash`), Claude (`claude-opus-5-5`) as an alternative. Switch with `EXTRACT_PROVIDER`.
+  `gemini-3.5-flash-lite`), Claude (`claude-opus-5-5`) as an alternative. Switch with `EXTRACT_PROVIDER`.
 - Supabase Postgres (`cases`, `extractions` cache) + Supabase Auth (email + password)
 - Stripe (test mode) for the subscription
 - PostGrid Print & Mail API for certified letters (test mode), behind `lib/mail`
