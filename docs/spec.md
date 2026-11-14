@@ -136,3 +136,24 @@ Data constraints so the expected flags hold:
   the bill's line amounts are higher than the EOB's. `amountDue` = 412, EOB total = 45.
 
 Each case folder has `expected.json`: `{ bill: BillDoc, eob: EobDoc, flags: Flag[], savedAmount: number }`.
+
+## Extraction cache (Task 11)
+
+`extractions(hash text primary key, doc_type, result jsonb, provider, model, created_at)`. `hash` =
+SHA-256 of `docType + "\n" + redactedText` (redacted text holds no personal details). Only validated results
+are stored. `/api/extract` checks the cache first; on a hit no AI call is made.
+
+## Authentication (Task 12)
+
+Supabase Auth, email + password. `cases.user_id uuid not null references auth.users`. Server routes read the
+user from the session cookie and only see that user's cases (unknown or other users' cases → 404).
+Public routes: `/`, sign-in/up pages, `/api/mail-webhook`, `/api/stripe-webhook`.
+
+## Payments (Task 15, plan to confirm)
+
+Stripe test mode. Subscription (proposed $12/month, includes 1 certified letter per month). Checkout to
+subscribe, Customer Portal to manage/cancel, `/api/stripe-webhook` keeps the plan in sync. `/api/send`
+requires an active plan with a letter left this month.
+
+Running costs to keep in mind for live use: Supabase Pro ~$25/mo, Vercel Pro ~$20/mo (Hobby forbids
+commercial use), PostGrid ~$5–10 per certified letter, Stripe ~2.9% + 30¢ per charge.

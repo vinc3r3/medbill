@@ -63,17 +63,46 @@ Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "D
     `sentAt` (migration 0002). Addresses on a cover page (else PostGrid auto-cancels); `/api/send` waits for
     PostGrid's checks before marking `sent`. Check: `npm run e2e:send`.
 
-- [ ] **11. Track.** Handle PostGrid tracking events in `/api/mail-webhook`; set a reminder 30 days after sending;
+Re-planned on 2026-11-15 (after deploying to Vercel): extraction cache, authentication, Stripe and a frontend
+pass were added. Auth comes before tracking because every later feature is per-user; webhooks stay public and
+are verified by signature.
+
+- [ ] **11. Cache extraction results.** Store each validated extraction under a SHA-256 fingerprint of
+  `docType` + redacted text (`extractions` table, migration 0003). Same document → no second AI call.
+  Needed because Gemini's free tier allows 5 requests/min and 20/day.
+  - Done when: unit tests pass, and running the same sample twice makes one AI call; the second
+    extraction is answered from the cache in under 1 second.
+
+- [ ] **12. Add authentication.** Supabase Auth with email + password (email confirmation off for the demo).
+  Sign-up, sign-in, sign-out pages; `cases.user_id` (migration); every case route checks the signed-in user.
+  `/api/mail-webhook` and the Stripe webhook stay public (signature-verified). The profile (name, DOB, member
+  ID, address) stays in the browser only, as before.
+  - Done when: signed-out requests to case routes get 401; user A gets 404 for user B's case; sign-up,
+    sign-in and sign-out work on the deployed site.
+
+- [ ] **13. Track.** Handle PostGrid tracking events in `/api/mail-webhook`; set a reminder 30 days after sending;
   add a "Simulate delivery" button (test mode may not send tracking events).
   - Done when: a status change to `delivered` shows on the dashboard.
 
-- [ ] **12. Build the dashboard.** All cases with status chips and a total "money saved".
-  - Done when: after running case C, it shows `sent` and $367.
+- [ ] **14. Build the dashboard.** The signed-in user's cases with status chips and a total "money saved";
+  app navigation (dashboard, new check, settings).
+  - Done when: after running case C, it shows `sent` and $367, and another user's cases never appear.
 
-- [ ] **13. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
+- [ ] **15. Add Stripe (test mode).** Subscription via Stripe Checkout + Customer Portal; webhook keeps the
+  user's plan in sync. Sending a letter requires an active plan. Plan *to confirm*: $12/month including
+  1 certified letter per month (each live certified letter costs ~$5–10 in postage and printing).
+  - Done when: test card 4242… completes Checkout and the plan becomes active via webhook; sending is
+    blocked without a plan; cancelling in the portal removes access.
+
+- [ ] **16. Frontend enhancement.** Landing page, app shell, case page with a tracking timeline, settings page
+  for the profile and plan; consistent design, mobile-first.
+  - Done when: every page works at 390px with no sideways scroll, has no console errors, and the full flow
+    can be completed from the landing page.
+
+- [ ] **17. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
   - Done when: the full demo runs three times in a row without a restart.
 
 ## Stretch
 
-- [ ] **14. Import EOBs from the Flexpa sandbox** instead of uploading them.
-- [ ] **15. Send by email** from the user's Gmail as an alternative to mail.
+- [ ] **18. Import EOBs from the Flexpa sandbox** instead of uploading them.
+- [ ] **19. Send by email** from the user's Gmail as an alternative to mail.
