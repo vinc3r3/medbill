@@ -13,7 +13,9 @@
     "samples": "node scripts/make-samples.mjs",
     "e2e:upload": "node scripts/e2e-upload.mjs",
     "postinstall": "node scripts/copy-tesseract.mjs",
-    "e2e:ocr": "node scripts/e2e-ocr.mjs"
+    "e2e:ocr": "node scripts/e2e-ocr.mjs",
+    "samples:ocr": "node scripts/ocr-fixtures.mjs",
+    "e2e:redact": "node scripts/e2e-redact.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",

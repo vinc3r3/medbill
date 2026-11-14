@@ -1,0 +1,15 @@
+. Claim ID: CLM-260721-0956
+Cedarline Health Plan Processed: 08/18/2026
+Explanation of Benefits
+
+THIS IS NOT A BILL
+Member Member ID: XKH448210937
+Jordan A. Rivera Provider: Summit Urgent Care
+1427 Maple Grove Ln, Fairhaven, OH 45099 Patient: Jordan A. Rivera
+Claim details
+DATE CODE SERVICE BILLED ALLOWED PLAN PAID YOU OWE
+07/21/2026 99204 Office visit, new patient, moderate $410.00 $230.00 $195.00 $35.00
+07/21/2026 73610 X-ray, ankle, 3 views $165.00 $90.00 $80.00 $10.00
+Totals $575.00 $320.00 $275.00 $45.00
+Your total responsibility: $45.00
+Your provider may bill you up to the amount you owe shown above. Keep this statement for your records.

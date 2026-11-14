@@ -1,8 +1,8 @@
 // Debug view of the raw OCR text. Shown on screen only; this text is never sent anywhere as-is.
 export function OcrDebugPanel({ billText, eobText }: { billText: string; eobText: string }) {
   return (
-    <details open className="rounded-xl border border-amber-400 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-950/30">
-      <summary className="cursor-pointer font-semibold">Debug: raw text read on this device</summary>
+    <details className="rounded-xl border border-amber-400 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-950/30">
+      <summary className="cursor-pointer font-semibold">Debug: raw text read on this device (never sent)</summary>
       <div className="mt-3 grid gap-4 sm:grid-cols-2">
         {[
           ['Bill', billText],

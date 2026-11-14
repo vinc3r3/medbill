@@ -39,7 +39,7 @@ try {
     await page.getByTestId('eob-input').setInputFiles(join('samples', key, `${key}-eob.png`));
     const started = Date.now();
     await page.getByRole('button', { name: 'Check my bill' }).click();
-    await page.getByTestId('ocr-bill').waitFor({ timeout: 120_000 });
+    await page.getByTestId('ocr-bill').waitFor({ state: 'attached', timeout: 120_000 }); // panel starts collapsed
     const seconds = ((Date.now() - started) / 1000).toFixed(1);
 
     const billText = await page.getByTestId('ocr-bill').textContent();

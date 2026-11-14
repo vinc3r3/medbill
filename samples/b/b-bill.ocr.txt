@@ -1,0 +1,16 @@
+Riverbend Medical Group PATIENT STATEMENT
+310 Mill Race Rd, Fairhaven, OH 45098 Statement date: 06/09/2026
+Billing questions: (555) 014-7730 Account #: RB-88120456
+Patient Insurance
+Jordan A. Rivera Cedarline Health Plan
+1427 Maple Grove Ln, Fairhaven, OH 45099 Member ID: XKH448210937
+DOB: 03/17/1984
+Services
+DATE CODE DESCRIPTION PATIENT AMOUNT
+05/12/2026 99214 Office visit, established patient, moderate $55.00
+05/12/2026 80053 Comprehensive metabolic panel $28.75
+05/12/2026 80053 Comprehensive metabolic panel $28.75
+05/12/2026 36415 Routine venipuncture (blood draw) $6.00
+Amount due $118.50
+Amounts shown are after insurance. Please pay the amount due within 30 days.
+Amount due: $118.50

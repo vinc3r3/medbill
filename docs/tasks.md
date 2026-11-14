@@ -24,9 +24,12 @@ Work top to bottom, one task per session. Tick a task (`- [x]`) only when its "D
   - Note: Tesseract worker, WASM core and English data are self-hosted from `public/tesseract` (copied on
     `postinstall`, git-ignored), so OCR makes zero external requests. Check: `npm run e2e:ocr`.
 
-- [ ] **5. Add redaction.** Profile form saved in `localStorage`; apply the redaction rules from the spec;
+- [x] **5. Add redaction.** Profile form saved in `localStorage`; apply the redaction rules from the spec;
   show a highlighted redacted view.
   - Done when: no profile value appears in the redacted text of any sample (unit test + visual check).
+  - Note: beyond the spec, profile values match across case/spacing/punctuation, DOB in any common format, and
+    single name words are also redacted ("RIVERA, JORDAN"). Unit tests run on real OCR fixtures
+    (`samples/*/*.ocr.txt`, from `npm run samples:ocr`); browser check: `npm run e2e:redact`.
 
 - [ ] **6. Extract with AI.** `/api/extract` sends redacted text to Claude and validates the JSON.
   - Done when: extracted totals match `expected.json` for all three cases.

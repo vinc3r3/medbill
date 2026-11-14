@@ -1,0 +1,14 @@
+Lakeside Family Medicine PATIENT STATEMENT
+88 Harbor View Dr, Suite 200, Fairhaven, OH 45098 Statement date: 04/02/2026
+Billing questions: (555) 014-2200 Account #: 004417-2291
+Patient Insurance
+Jordan A. Rivera Cedarline Health Plan
+1427 Maple Grove Ln, Fairhaven, OH 45099 Member ID: XKH448210937
+DOB: 03/17/1984
+Services
+DATE CODE DESCRIPTION PATIENT AMOUNT
+03/04/2026 99213 Office visit, established patient $40.00
+03/04/2026 85025 Complete blood count (CBC) $12.50
+Amount due $52.50
+Amounts shown are after insurance. Please pay the amount due within 30 days.
+Amount due: $52.50

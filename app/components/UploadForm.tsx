@@ -1,8 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useProfile } from '@/app/hooks/useProfile';
+import { isProfileEmpty } from '@/lib/profile';
+import { redact } from '@/lib/redact';
 import { DropZone } from './DropZone';
 import { OcrDebugPanel } from './OcrDebugPanel';
+import { RedactedView } from './RedactedView';
 
 type OcrState =
   | { kind: 'idle' }
@@ -18,6 +22,13 @@ export function UploadForm() {
   const [ocr, setOcr] = useState<OcrState>({ kind: 'idle' });
   const reading = ocr.kind === 'reading';
   const ready = bill !== null && eob !== null && !reading;
+  const profile = useProfile();
+
+  // Redacted text is derived, so it updates as soon as the profile is saved or changed.
+  const redacted = useMemo(
+    () => (ocr.kind === 'done' ? { bill: redact(ocr.billText, profile), eob: redact(ocr.eobText, profile) } : null),
+    [ocr, profile],
+  );
 
   // Changing a document invalidates the text read from the old one.
   const resetOcr = () => setOcr({ kind: 'idle' });
@@ -89,6 +100,13 @@ export function UploadForm() {
           {ocr.message}
         </p>
       )}
+      {redacted && isProfileEmpty(profile) && (
+        <p role="alert" className="rounded-lg bg-amber-100 p-3 text-sm text-amber-950 dark:bg-amber-950/50 dark:text-amber-100">
+          Add your details above so we can remove your name and address. Common fields like DOB and member ID are already
+          removed by pattern.
+        </p>
+      )}
+      {redacted && <RedactedView billText={redacted.bill} eobText={redacted.eob} />}
       {ocr.kind === 'done' && <OcrDebugPanel billText={ocr.billText} eobText={ocr.eobText} />}
     </form>
   );

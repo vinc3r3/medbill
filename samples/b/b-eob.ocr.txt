@@ -1,0 +1,17 @@
+H Claim ID: CLM-260512-4402
+Cedarline Health Plan Processed: 06/09/2026
+Explanation of Benefits
+
+THIS IS NOT A BILL
+Member Member ID: XKH448210937
+Jordan A. Rivera Provider: Riverbend Medical Group
+1427 Maple Grove Ln, Fairhaven, OH 45099 Patient: Jordan A. Rivera
+Claim details
+DATE CODE SERVICE BILLED ALLOWED PLAN PAID YOU OWE
+05/12/2026 99214 Office visit, established patient, $240.00 $145.00 $90.00 $55.00
+moderate
+05/12/2026 80053 Comprehensive metabolic panel $95.00 $38.75 $10.00 $28.75
+05/12/2026 36415 Routine venipuncture (blood draw) $25.00 $9.00 $3.00 $6.00
+Totals $360.00 $192.75 $103.00 $89.75
+Your total responsibility: $89.75
+Your provider may bill you up to the amount you owe shown above. Keep this statement for your records.
