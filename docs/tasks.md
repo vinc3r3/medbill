@@ -111,18 +111,23 @@ are verified by signature.
     "more info" keep the case open. Follow-up letter is suggested, not generated. Sample corrected statement:
     `samples/c/c-corrected.png`. Check: `npm run e2e:reply` (local; $367 saved, dashboard "Money saved" $367).
 
-- [ ] **16. Decide pricing.** The need is occasional (a few bills a year), so a monthly subscription may churn.
+- [x] **16. Decide pricing.** The need is occasional (a few bills a year), so a monthly subscription may churn.
   Compare: monthly ($10–15), annual plan, pay per letter (~$5–10 cost each in live mode), success fee
   (% of money saved, charged when a case is `resolved`), or a mix (e.g. free checks + pay per letter + optional
   annual plan). Consider running costs (spec, "Payments") and what's easiest to show judges with Stripe.
   - Done when: the chosen model, prices and what's free vs paid are written into the spec's "Payments"
     section and Task 17 is updated to match.
+  - Note: free checks + $14.99 per letter + optional $39/year plan (4 letters). Details in the spec's "Payments".
 
-- [ ] **17. Add Stripe (test mode).** Implement the model chosen in Task 16 with Stripe Checkout (and the
-  Customer Portal if there's a subscription); `/api/stripe-webhook` keeps payments/plans in sync; sending a
-  letter requires payment or an active plan as decided.
-  - Done when: test card 4242… completes Checkout and access is granted via the webhook; sending is blocked
-    without payment/plan; a cancelled or failed payment removes access.
+- [ ] **17. Add Stripe (test mode).** Free checks, $14.99 per letter, optional $39/year plan with 4 letters
+  (spec, "Payments"). Setup script creates the two Prices; Checkout for a single letter (per case) and for the
+  plan; Customer Portal from Settings; `/api/stripe-webhook` (signature-verified, idempotent) grants and removes
+  access; `/api/send` needs a paid case or a plan letter left (pure rule, tests first); Settings shows the plan
+  and letters left.
+  - Done when: test card 4242… completes Checkout and access is granted via the webhook (single letter and
+    plan); sending is blocked (402) without payment or plan letters; a 5th plan letter in a year is blocked; a
+    failed payment (card 4000 0000 0000 0341) or a cancelled plan removes access; a refund before sending
+    unpays the case.
 
 - [ ] **18. Frontend enhancement.** Landing page, app shell, case page with a tracking timeline, settings page
   for the profile and plan; consistent design, mobile-first.

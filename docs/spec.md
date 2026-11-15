@@ -155,10 +155,51 @@ Public routes: `/`, sign-in/up pages, `/api/mail-webhook`, `/api/stripe-webhook`
 
 ## Payments (decided in Task 16, built in Task 17)
 
-Stripe test mode. Model not decided yet (Task 16): candidates are a subscription (e.g. $12/month incl. 1 letter),
-an annual plan, pay per letter, a success fee, or a mix. Working assumption until then: subscription. Checkout to
-subscribe, Customer Portal to manage/cancel, `/api/stripe-webhook` keeps the plan in sync. `/api/send`
-requires an active plan with a letter left this month.
+Stripe test mode only (`sk_test_…`; the code refuses any other key). Hosted Checkout, so no publishable key is
+needed. The need is occasional (a few bills a year), so the paid step is the one that costs us money: the letter.
+
+**Model: free checks + pay per letter, with an optional annual plan.**
+
+| | Price | What you get |
+| --- | --- | --- |
+| Free | $0 | Upload, on-device OCR/redaction, extraction, flags, review, draft and edit the letter, reply tracking |
+| Single letter | $14.99 one-time | One certified letter for one case |
+| Annual plan | $39/year | 4 certified letters per plan year (no rollover), renews yearly, cancel any time |
+
+Unit economics (live): a letter costs ~$5–10 at PostGrid. Single letter: $14.99 − Stripe ~$0.73 → ~$4–9 margin.
+Annual: $39 − ~$1.43 → ~$37.5 for up to 4 letters, so it breaks even only if the average letter costs under ~$9.40
+and the plan year's letters aren't all used. Fixed costs ~$45/mo (below) need ~10 single letters a month.
+
+**Stripe objects.** Two Prices, created by a setup script (test mode) and found by lookup key:
+`letter_single` (one-time, $14.99) and `plan_annual` (recurring yearly, $39). One Stripe Customer per user,
+created on first Checkout.
+
+**When to pay.** At "Approve and send" on the case page:
+- Case already paid, or an active plan with a letter left → send as today (a plan send uses one plan letter).
+- Otherwise → choose "Pay $14.99 and send" (Checkout `mode: payment`, `metadata.caseId`) or "Get the annual plan,
+  $39" (Checkout `mode: subscription`). Checkout returns to the case page; the approved letter, which holds
+  filled-in personal details, is kept in `sessionStorage` across the redirect (browser only, never the server)
+  and cleared after sending.
+
+**Access is granted by the webhook only** (`/api/stripe-webhook`, public, signature-verified), never by the
+Checkout success redirect:
+- `checkout.session.completed` (payment, `payment_status: paid`) → the case is paid for one letter.
+- `checkout.session.completed` (subscription) and `customer.subscription.created|updated|deleted` → store the
+  plan's status and current period. Plan letters are available while status is `active` or `trialing`.
+- `invoice.payment_failed` / status `past_due`, `unpaid`, `canceled`, `incomplete*` → no plan letters.
+- `charge.refunded` for a single-letter payment → the case is no longer paid if the letter hasn't been sent
+  (a letter already mailed can't be recalled; the refund is just recorded).
+Events are processed idempotently (event id stored), since Stripe retries.
+
+**Plan letters used** = the user's cases sent with `paidVia: 'plan'` since the current period start. Customer
+Portal (from Settings) to update the card, see invoices and cancel. Portal cancellation takes effect at period
+end (standard); access stays until then.
+
+**Data** (Task 17 migration): `billing(user_id pk, stripe_customer_id, plan_status, plan_period_start,
+plan_period_end, stripe_subscription_id)`, `stripe_events(id pk, created_at)`, and on `cases`:
+`paid_via text check (paid_via in ('letter','plan'))`, `stripe_payment_intent text`. `/api/send` answers 402 with
+a readable message when the case isn't paid and no plan letter is left; the paid/plan check is a pure function
+with unit tests.
 
 Running costs to keep in mind for live use: Supabase Pro ~$25/mo, Vercel Pro ~$20/mo (Hobby forbids
 commercial use), PostGrid ~$5–10 per certified letter, Stripe ~2.9% + 30¢ per charge.
