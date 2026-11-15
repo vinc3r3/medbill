@@ -30,7 +30,8 @@
     "e2e:demo": "node scripts/e2e-demo.mjs",
     "stripe:setup": "node scripts/stripe-setup.mjs",
     "dev:stripe": "node scripts/dev-stripe.mjs",
-    "e2e:stripe": "node scripts/e2e-stripe.mjs"
+    "e2e:stripe": "node scripts/e2e-stripe.mjs",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

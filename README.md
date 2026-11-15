@@ -7,6 +7,8 @@ doesn't add up, drafts a polite dispute letter, mails it by certified mail, and 
 
 **Live demo:** https://medbill-zimran.vercel.app · test mode, synthetic data, no real mail or charges
 
+![MedBill Checker landing page](docs/screenshots/landing.png)
+
 ![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
@@ -38,11 +40,13 @@ line, and disputing means writing a letter and mailing it. Most people just pay.
 | 6. Send | Certified letter via PostGrid, paid by Stripe ($14.99, or $39/year for 4) |
 | 7. Track | Delivery via webhook, log the provider's reply, see **money saved** on the dashboard |
 
-<p>
-  <img src="docs/screenshots/case-review.png" width="280" alt="Case review: bill asks $412, EOB says $45, $367 to question">
-  &nbsp;&nbsp;
-  <img src="docs/screenshots/dashboard.png" width="280" alt="Dashboard showing $367 saved on a resolved case">
-</p>
+**Line-by-line review:** the bill and the EOB side by side, each flag explained, and the amount to question.
+
+![Case review: bill asks $412, EOB says $45, $367 to question](docs/screenshots/case-review.png)
+
+**Dashboard:** every case, its status, and the money in dispute, saved and still to review.
+
+![Dashboard with the three sample cases](docs/screenshots/dashboard.png)
 
 ## Try it in 2 minutes
 
