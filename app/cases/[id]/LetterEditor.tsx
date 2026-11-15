@@ -50,7 +50,7 @@ export function LetterEditor({ caseId, initialLetter, providerName }: { caseId: 
           type="button"
           onClick={draft}
           disabled={state.kind === 'drafting'}
-          className="self-start rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:bg-neutral-400"
+          className="btn btn-primary self-start"
         >
           {state.kind === 'drafting' ? 'Drafting…' : 'Draft a letter'}
         </button>
@@ -67,12 +67,12 @@ export function LetterEditor({ caseId, initialLetter, providerName }: { caseId: 
     return (
       <section aria-label="Approved letter" className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Your letter, ready to send</h2>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-muted">
           Your details were filled in on this device. Read it once more before sending.
         </p>
         <pre
           data-testid="letter-final"
-          className="rounded-xl border border-neutral-300 bg-white p-5 font-sans text-sm leading-relaxed whitespace-pre-wrap text-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+          className="card font-sans text-sm leading-relaxed whitespace-pre-wrap"
         >
           {state.filled}
         </pre>
@@ -92,7 +92,7 @@ export function LetterEditor({ caseId, initialLetter, providerName }: { caseId: 
   return (
     <section aria-label="Letter editor" className="flex flex-col gap-3">
       <h2 className="text-lg font-semibold">Your letter</h2>
-      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+      <p className="text-sm text-muted">
         Edit anything you like.{' '}
         {usedPlaceholders.length > 0 && (
           <>
@@ -116,13 +116,13 @@ export function LetterEditor({ caseId, initialLetter, providerName }: { caseId: 
         }}
         rows={28}
         spellCheck
-        className="w-full rounded-xl border border-neutral-300 bg-white p-4 text-sm leading-relaxed dark:border-neutral-700 dark:bg-neutral-900"
+        className="input w-full rounded-2xl p-4 text-sm leading-relaxed"
       />
       {missing.length > 0 && (
         <p role="alert" className="text-sm text-red-700 dark:text-red-400">
-          Add {missing.map((p) => PLACEHOLDER_HELP[p]).join(' and ')} under &quot;Your details&quot; on the{' '}
-          <Link href="/" className="underline">
-            home page
+          Add {missing.map((p) => PLACEHOLDER_HELP[p]).join(' and ')} in{' '}
+          <Link href="/settings" className="link">
+            Settings
           </Link>
           , then approve again.
         </p>
@@ -135,12 +135,12 @@ export function LetterEditor({ caseId, initialLetter, providerName }: { caseId: 
             if (notFilled.length) return setMissing(notFilled);
             setState({ kind: 'approved', draft: state.draft, original: state.original, filled: text });
           }}
-          className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white"
+          className="btn btn-primary"
         >
           Approve letter
         </button>
         {state.draft !== state.original && (
-          <button type="button" className="text-sm underline" onClick={() => setState({ ...state, draft: state.original })}>
+          <button type="button" className="link text-sm" onClick={() => setState({ ...state, draft: state.original })}>
             Undo my edits
           </button>
         )}

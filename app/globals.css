@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
+/* Design tokens. Light by default, dark follows the system setting. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --background: #f7f8fa;
+  --surface: #ffffff;
+  --foreground: #14171f;
+  --muted: #5b6372;
+  --line: #dde1e8;
+  --brand: #1d4ed8;
+  --brand-strong: #1e40af;
+  --brand-soft: #e8efff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b0d12;
+    --surface: #131720;
+    --foreground: #e9ecf2;
+    --muted: #9aa3b2;
+    --line: #2a303c;
+    --brand: #4f7cff;
+    --brand-strong: #6d92ff;
+    --brand-soft: #18233f;
   }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Shared building blocks, so every page looks the same. */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-center font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed;
+}
+@utility btn-primary {
+  @apply bg-brand text-white hover:bg-brand-strong disabled:bg-neutral-400 dark:text-neutral-950 dark:disabled:bg-neutral-600;
+}
+@utility btn-secondary {
+  @apply border border-line bg-surface hover:bg-brand-soft disabled:opacity-60;
+}
+@utility card {
+  @apply rounded-2xl border border-line bg-surface p-5;
+}
+@utility input {
+  @apply rounded-lg border border-line bg-surface px-3 py-2 text-base focus-visible:outline-2 focus-visible:outline-brand;
+}
+@utility link {
+  @apply font-medium underline underline-offset-2 hover:text-brand;
 }

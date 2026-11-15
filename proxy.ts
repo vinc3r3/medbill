@@ -3,7 +3,8 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_PAGES = ['/signin', '/signup'];
+const AUTH_PAGES = ['/signin', '/signup'];
+const PUBLIC_PAGES = ['/', ...AUTH_PAGES];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -39,7 +40,7 @@ export async function proxy(request: NextRequest) {
     for (const c of response.cookies.getAll()) redirect.cookies.set(c);
     return redirect;
   }
-  if (signedIn && PUBLIC_PAGES.includes(pathname)) {
+  if (signedIn && AUTH_PAGES.includes(pathname)) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
   return response;

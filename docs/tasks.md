@@ -128,13 +128,19 @@ are verified by signature.
     plan); sending is blocked (402) without payment or plan letters; a 5th plan letter in a year is blocked; a
     failed payment (card 4000 0000 0000 0341) or a cancelled plan removes access; a refund before sending
     unpays the case.
+  - Skipped for now (2026-11-15, user's call): needs a Stripe test key and webhook forwarding. Sending stays free;
+    the landing page and Settings say payments aren't switched on in the demo.
 
-- [ ] **18. Frontend enhancement.** Landing page, app shell, case page with a tracking timeline, settings page
+- [x] **18. Frontend enhancement.** Landing page, app shell, case page with a tracking timeline, settings page
   for the profile and plan; consistent design, mobile-first.
   - Done when: every page works at 390px with no sideways scroll, has no console errors, and the full flow
     can be completed from the landing page.
   - Also: after a change (e.g. delivered), navigating back to the dashboard briefly shows the prefetched
     copy before it refreshes. Move mutations to server actions (or invalidate the router cache) to avoid it.
+  - Note: shared tokens/utilities in `globals.css` (`btn`, `card`, `input`, `link`); public landing at `/`
+    (redirect removed); case page has a tracking timeline (`lib/timeline.ts`, tested) and puts tracking above the
+    tables once sent. Stale dashboard fixed with a `caseChanged` server action (`revalidatePath`) after each
+    mutation. Check: `npm run e2e:frontend` (390px, landing → sign up → … → resolved; no stale status).
 
 - [ ] **19. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
   - Done when: the full demo runs three times in a row without a restart.

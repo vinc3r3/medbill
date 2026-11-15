@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { findProviderAddress } from '@/lib/address';
 import { postJson } from '@/lib/api-client';
+import { caseChanged } from '@/app/cases/actions';
 import { saveProviderAddress } from '@/lib/provider-address-store';
 import type { BillDoc, Case, EobDoc, Flag } from '@/lib/types';
 
@@ -53,6 +54,7 @@ export function SendForCheck({
       step = 'check';
       setState({ kind: 'running', step });
       await postJson<Flag[]>('/api/check', { caseId: created.id });
+      await caseChanged(created.id);
       router.push(`/cases/${created.id}`);
     } catch (err) {
       setState({ kind: 'error', step, message: err instanceof Error ? err.message : 'Something went wrong. Please try again.' });
@@ -63,17 +65,17 @@ export function SendForCheck({
   const currentIdx = current ? STEPS.findIndex((s) => s.id === current) : -1;
 
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-blue-300 p-4 dark:border-blue-800">
+    <section className="card flex flex-col gap-3 border-brand/40 p-4">
       <div className="flex flex-wrap items-center gap-4">
         <button
           type="button"
           onClick={run}
           disabled={!profileReady || running}
-          className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:bg-neutral-400"
+          className="btn btn-primary"
         >
           {running ? 'Checking…' : state.kind === 'error' ? 'Try again' : 'Check my bill'}
         </button>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-muted">
           {profileReady
             ? 'Sends only the redacted text shown above.'
             : 'Save your details above first, so your name and address are removed before sending.'}

@@ -1,10 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useProfile } from '@/app/hooks/useProfile';
 import { parseUsAddress, type UsAddress } from '@/lib/address';
 import { postJson } from '@/lib/api-client';
+import { caseChanged } from '@/app/cases/actions';
 import { loadProviderAddress } from '@/lib/provider-address-store';
 
 type Contact = UsAddress & { name: string };
@@ -19,12 +19,12 @@ function AddressFields({ legend, value, onChange, testId }: { legend: string; va
         onChange={(e) => onChange({ ...value, [key]: e.target.value })}
         autoComplete={extra.autoComplete ?? 'off'}
         maxLength={extra.maxLength}
-        className="rounded-md border border-neutral-300 px-3 py-2 text-base dark:border-neutral-700 dark:bg-neutral-900"
+        className="input"
       />
     </label>
   );
   return (
-    <fieldset data-testid={testId} className="grid grid-cols-6 gap-3 rounded-xl border border-neutral-300 p-4 dark:border-neutral-700">
+    <fieldset data-testid={testId} className="card grid grid-cols-6 gap-3 p-4">
       <legend className="px-1 font-semibold">{legend}</legend>
       {field('name', 'Name', { className: 'col-span-6' })}
       {field('addressLine1', 'Street address', { className: 'col-span-6' })}
@@ -38,7 +38,6 @@ function AddressFields({ legend, value, onChange, testId }: { legend: string; va
 
 /** Confirm addresses and send the approved, filled letter by certified mail (test mode). */
 export function SendPanel({ caseId, providerName, filledLetter }: { caseId: string; providerName: string; filledLetter: string }) {
-  const router = useRouter();
   const profile = useProfile();
   const [to, setTo] = useState<Contact>(() => {
     const found = typeof window === 'undefined' ? null : loadProviderAddress(caseId);
@@ -54,7 +53,7 @@ export function SendPanel({ caseId, providerName, filledLetter }: { caseId: stri
     const clean = (c: Contact) => ({ ...c, addressLine2: c.addressLine2?.trim() || undefined });
     try {
       await postJson('/api/send', { caseId, letterText: filledLetter, to: clean(to), from: clean(from) });
-      router.refresh(); // the review page re-renders with the "sent" panel
+      await caseChanged(caseId); // re-renders this page and refreshes the dashboard
     } catch (err) {
       setError(err instanceof Error ? err.message : 'We could not send your letter.');
       setSending(false);
@@ -64,7 +63,7 @@ export function SendPanel({ caseId, providerName, filledLetter }: { caseId: stri
   return (
     <section aria-label="Send letter" className="flex flex-col gap-3">
       <h2 className="text-lg font-semibold">Where to send it</h2>
-      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+      <p className="text-sm text-muted">
         We found the billing address on your bill. Check both addresses before sending.
       </p>
       <div className="grid gap-4 md:grid-cols-2">
@@ -76,11 +75,11 @@ export function SendPanel({ caseId, providerName, filledLetter }: { caseId: stri
           type="button"
           onClick={send}
           disabled={sending}
-          className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:bg-neutral-400"
+          className="btn btn-primary"
         >
           {sending ? 'Sending… (about 10 seconds)' : 'Approve and send by certified mail'}
         </button>
-        <span className="text-sm text-neutral-600 dark:text-neutral-400">Test mode: nothing is printed or mailed.</span>
+        <span className="text-sm text-muted">Test mode: nothing is printed or mailed.</span>
       </div>
       {error && (
         <p role="alert" className="text-sm text-red-700 dark:text-red-400">

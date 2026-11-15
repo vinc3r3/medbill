@@ -21,27 +21,27 @@ export async function DashboardContent() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Your cases</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">Every bill you&apos;ve checked, and where each dispute stands.</p>
+          <p className="text-muted">Every bill you&apos;ve checked, and where each dispute stands.</p>
         </div>
-        <Link href="/new" className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white">
+        <Link href="/new" className="btn btn-primary">
           New check
         </Link>
       </header>
 
-      <section aria-label="Totals" className="grid gap-3 sm:grid-cols-3">
+      <section aria-label="Totals" className="grid grid-cols-3 gap-2 sm:gap-3">
         <Stat testId="stat-in-dispute" label="In dispute" value={formatUsd(s.inDispute, { compact: true })} hint="Letters sent, waiting for a reply" />
         <Stat testId="stat-saved" label="Money saved" value={formatUsd(s.saved, { compact: true })} hint="Confirmed by a corrected bill" />
         <Stat testId="stat-to-review" label="To review" value={formatUsd(s.toReviewAmount, { compact: true })} hint={`${s.toReview} case${s.toReview === 1 ? '' : 's'} with no letter sent yet`} />
       </section>
 
       {cases.length === 0 ? (
-        <section className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-neutral-300 p-8 dark:border-neutral-700">
+        <section className="flex flex-col items-start gap-3 rounded-2xl border border-dashed border-line bg-surface p-8">
           <p className="text-lg font-semibold">No cases yet</p>
-          <p className="text-neutral-600 dark:text-neutral-400">Upload a bill and your insurer&apos;s EOB to see if anything is worth questioning.</p>
+          <p className="text-muted">Upload a bill and your insurer&apos;s EOB to see if anything is worth questioning.</p>
           <Link href="/new" className="font-medium underline">Start your first check</Link>
         </section>
       ) : (
-        <ul aria-label="Cases" className="flex flex-col divide-y divide-neutral-200 rounded-xl border border-neutral-300 dark:divide-neutral-800 dark:border-neutral-700">
+        <ul aria-label="Cases" className="flex flex-col divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
           {cases.map((c) => (
             <CaseRow key={c.id} c={c} />
           ))}
@@ -53,10 +53,10 @@ export async function DashboardContent() {
 
 function Stat({ label, value, hint, testId }: { label: string; value: string; hint: string; testId: string }) {
   return (
-    <div className="rounded-xl border border-neutral-300 p-4 dark:border-neutral-700">
-      <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">{label}</p>
-      <p data-testid={testId} className="text-3xl font-bold tabular-nums">{value}</p>
-      <p className="text-xs text-neutral-500">{hint}</p>
+    <div className="card min-w-0 p-3 sm:p-4">
+      <p className="text-xs font-medium text-muted sm:text-sm">{label}</p>
+      <p data-testid={testId} className="truncate text-xl font-bold tabular-nums sm:text-3xl">{value}</p>
+      <p className="hidden text-xs text-muted sm:block">{hint}</p>
     </div>
   );
 }
@@ -69,10 +69,10 @@ function CaseRow({ c }: { c: Case }) {
       : c.status === 'checked' ? 'Nothing to question' : '';
   return (
     <li data-testid="case-row" data-case-id={c.id}>
-      <Link href={`/cases/${c.id}`} className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4 hover:bg-neutral-50 dark:hover:bg-neutral-900">
+      <Link href={`/cases/${c.id}`} className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4 hover:bg-brand-soft">
         <div className="min-w-0 basis-full sm:flex-1 sm:basis-0">
           <p className="truncate font-semibold">{c.bill.provider}</p>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          <p className="text-sm text-muted">
             Service {formatUsDate(c.bill.serviceDate)} · {c.eob.insurer}
           </p>
         </div>

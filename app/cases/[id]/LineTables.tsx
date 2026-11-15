@@ -20,12 +20,12 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <h2 className="text-lg font-semibold">{title}</h2>
-      <div className="overflow-x-auto rounded-xl border border-neutral-300 dark:border-neutral-700">{children}</div>
+      <div className="overflow-x-auto rounded-2xl border border-line bg-surface">{children}</div>
     </div>
   );
 }
 
-const th = 'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-neutral-600 dark:text-neutral-400';
+const th = 'px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted';
 const td = 'px-3 py-2 align-top';
 const num = 'text-right whitespace-nowrap tabular-nums';
 // Secondary EOB columns: hidden on phones so "You owe" always fits on screen.
@@ -35,7 +35,7 @@ export function BillTable({ bill, marks, totalsMarks }: { bill: BillDoc; marks: 
   return (
     <Panel title="Your bill">
       <table className="w-full text-sm" data-testid="bill-table">
-        <thead className="border-b border-neutral-300 dark:border-neutral-700">
+        <thead className="border-b border-line">
           <tr>
             <th className={th}>Date</th>
             <th className={th}>Service</th>
@@ -75,7 +75,7 @@ export function EobTable({ eob, marks, totalsMarks }: { eob: EobDoc; marks: Map<
   return (
     <Panel title="Your EOB (from your insurer)">
       <table className="w-full text-sm" data-testid="eob-table">
-        <thead className="border-b border-neutral-300 dark:border-neutral-700">
+        <thead className="border-b border-line">
           <tr>
             <th className={th}>Date</th>
             <th className={th}>Service</th>

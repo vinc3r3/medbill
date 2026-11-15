@@ -26,14 +26,14 @@ export function ProfileForm() {
       data-ready={hydrated || undefined}
       open={userOpen ?? empty}
       onToggle={(e) => setUserOpen(e.currentTarget.open)}
-      className="rounded-xl border border-neutral-300 p-4 dark:border-neutral-700">
+      className="card p-4">
       <summary className="cursor-pointer font-semibold">
         Your details{' '}
-        <span className="font-normal text-neutral-600 dark:text-neutral-400">
+        <span className="font-normal text-muted">
           {empty ? '(add them so we can remove them from your documents)' : `(saved on this device: ${profile.name || 'no name'})`}
         </span>
       </summary>
-      <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+      <p className="mt-2 text-sm text-muted">
         These stay in this browser. We use them to remove your personal details before anything is sent, and to fill in
         your letter when you approve it.
       </p>
@@ -58,18 +58,18 @@ export function ProfileForm() {
               defaultValue={profile[key]}
               placeholder={placeholder}
               autoComplete={autoComplete}
-              className="rounded-md border border-neutral-300 px-3 py-2 text-base dark:border-neutral-700 dark:bg-neutral-900"
+              className="input"
             />
           </label>
         ))}
         <div className="flex items-center gap-3 sm:col-span-2">
-          <button type="submit" className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-neutral-100 dark:text-neutral-900">
+          <button type="submit" className="btn btn-primary px-4 py-2 text-sm">
             Save details
           </button>
           {!empty && (
             <button
               type="button"
-              className="text-sm underline"
+              className="link text-sm"
               onClick={() => {
                 saveProfile(null);
                 setMessage('Removed from this device.');
@@ -79,7 +79,7 @@ export function ProfileForm() {
             </button>
           )}
           {message && (
-            <span role="status" className="text-sm text-neutral-600 dark:text-neutral-400">
+            <span role="status" className="text-sm text-muted">
               {message}
             </span>
           )}

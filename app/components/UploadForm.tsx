@@ -82,7 +82,7 @@ export function UploadForm() {
           }}
         />
       </div>
-      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+      <p className="text-sm text-muted">
         Your documents stay on this device. Text is read here, and personal details are removed before anything is
         sent.
       </p>
@@ -90,12 +90,12 @@ export function UploadForm() {
         <button
           type="submit"
           disabled={!ready}
-          className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:bg-neutral-400"
+          className="btn btn-primary"
         >
           {reading ? 'Reading…' : 'Read my documents'}
         </button>
         {reading && (
-          <p role="status" className="text-sm text-neutral-600 dark:text-neutral-400">
+          <p role="status" className="text-sm text-muted">
             {ocr.label}… {ocr.percent}%
           </p>
         )}

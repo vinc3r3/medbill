@@ -7,12 +7,14 @@ import { formatUsd, formatUsDate } from '@/lib/format';
 import { FLAG_LABELS, rowMarks } from '@/lib/review';
 import { OUTCOME_LABELS, caseRef, questionedAmount, remainingFlags } from '@/lib/replies';
 import type { Case, Flag } from '@/lib/types';
+import { timeline } from '@/lib/timeline';
 import { isReminderDue, reminderDate } from '@/lib/tracking';
 import { StatusChip } from '../../components/StatusChip';
 import { FlagBadge } from './FlagBadge';
 import { SimulateDeliveryButton } from './SimulateDeliveryButton';
 import { LetterEditor } from './LetterEditor';
 import { ReplyPanel } from './ReplyPanel';
+import { Timeline } from './Timeline';
 import { BillTable, EobTable } from './LineTables';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -35,24 +37,25 @@ function ReviewView({ c }: { c: Case }) {
   return (
     <>
       <header className="flex flex-col gap-1">
-        <Link href="/dashboard" className="text-sm underline">
+        <Link href="/dashboard" className="link w-fit text-sm">
           ← Dashboard
         </Link>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">{c.bill.provider}</h1>
           <StatusChip status={c.status} />
         </div>
-        <p className="text-neutral-600 dark:text-neutral-400">
+        <p className="text-muted">
           Service date {formatUsDate(c.bill.serviceDate)} · {c.eob.insurer} · Claim {c.eob.claimId}
         </p>
       </header>
 
+      <div className={`grid gap-4 ${c.flags.length > 0 ? 'lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start' : ''}`}>
       {c.status === 'resolved' ? (
         <ResolvedSummary c={c} />
       ) : (
         <section
           aria-label="Summary"
-          className={`rounded-xl border p-5 ${toQuestion > 0 ? 'border-amber-400 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30' : 'border-emerald-400 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/30'}`}
+          className={`rounded-2xl border p-5 ${toQuestion > 0 ? 'border-amber-400 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30' : 'border-emerald-400 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/30'}`}
         >
           {toQuestion > 0 ? (
             <>
@@ -74,6 +77,15 @@ function ReviewView({ c }: { c: Case }) {
           )}
         </section>
       )}
+      {c.flags.length > 0 && <Timeline steps={timeline(c)} />}
+      </div>
+
+      {/* Once the letter is out, tracking comes first: status, replies, and the next action. */}
+      {c.mailLetterId && <SentPanel c={c} />}
+
+      {c.replies.length > 0 && <ReplyHistory c={c} />}
+
+      {(c.status === 'sent' || c.status === 'delivered') && <ReplyPanel caseId={c.id} caseRef={caseRef(c.id)} />}
 
       {c.flags.length > 0 && (
         <section aria-label="Items to question" className="flex flex-col gap-3">
@@ -91,11 +103,6 @@ function ReviewView({ c }: { c: Case }) {
         <EobTable eob={c.eob} marks={marks.eob} totalsMarks={marks.totals} />
       </section>
 
-      {c.mailLetterId && <SentPanel c={c} />}
-
-      {c.replies.length > 0 && <ReplyHistory c={c} />}
-
-      {(c.status === 'sent' || c.status === 'delivered') && <ReplyPanel caseId={c.id} caseRef={caseRef(c.id)} />}
 
       {c.flags.length > 0 && (c.status === 'checked' || c.status === 'letter_ready') && (
         <LetterEditor caseId={c.id} initialLetter={c.letter} providerName={c.bill.provider} />
@@ -106,12 +113,12 @@ function ReviewView({ c }: { c: Case }) {
 
 function FlagCard({ n, flag }: { n: number; flag: Flag }) {
   return (
-    <li data-testid="flag-card" className="flex gap-3 rounded-xl border border-neutral-300 p-4 dark:border-neutral-700">
+    <li data-testid="flag-card" className="flex gap-3 card p-4">
       <FlagBadge n={n} />
       <div className="flex min-w-0 flex-col gap-1">
         <p className="font-semibold">{FLAG_LABELS[flag.kind]}</p>
         <p>{flag.explanation}</p>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-muted">
           Billed {formatUsd(flag.billed)} · Expected {formatUsd(flag.expected)} ·{' '}
           <span className="font-semibold text-neutral-900 dark:text-neutral-100">Difference {formatUsd(flag.difference)}</span>
         </p>
@@ -131,12 +138,12 @@ function SentPanel({ c }: { c: Case }) {
     <section
       aria-label="Letter sent"
       data-testid="sent-panel"
-      className="flex flex-col gap-2 rounded-xl border border-emerald-400 bg-emerald-50 p-5 dark:border-emerald-700 dark:bg-emerald-950/30"
+      className="flex flex-col gap-2 rounded-2xl border border-emerald-400 bg-emerald-50 p-5 dark:border-emerald-700 dark:bg-emerald-950/30"
     >
       <p className="text-lg font-semibold">
         {delivered ? 'Your letter was delivered' : 'Letter sent by certified mail'}
         {sentOn ? ` · sent ${sentOn}` : ''}{' '}
-        <span className="text-sm font-normal text-neutral-600 dark:text-neutral-400">(test mode: not actually mailed)</span>
+        <span className="text-sm font-normal text-muted">(test mode: not actually mailed)</span>
       </p>
       <p className="text-sm text-neutral-700 dark:text-neutral-300">
         Status: <span data-testid="case-status" className="font-semibold">{c.status}</span> · Ref{' '}
@@ -167,7 +174,7 @@ function ResolvedSummary({ c }: { c: Case }) {
   return (
     <section
       aria-label="Summary"
-      className="rounded-xl border border-emerald-400 bg-emerald-50 p-5 dark:border-emerald-700 dark:bg-emerald-950/30"
+      className="rounded-2xl border border-emerald-400 bg-emerald-50 p-5 dark:border-emerald-700 dark:bg-emerald-950/30"
     >
       <p data-testid="saved-amount" className="text-3xl font-bold">
         {formatUsd(c.savedAmount, { compact: true })} saved
@@ -195,14 +202,14 @@ function ReplyHistory({ c }: { c: Case }) {
             <p className="font-semibold">
               {fmt(r.receivedAt)} · {OUTCOME_LABELS[r.outcome]}
             </p>
-            {r.bill && <p className="text-neutral-600 dark:text-neutral-400">New amount due: {formatUsd(r.bill.amountDue)}</p>}
+            {r.bill && <p className="text-muted">New amount due: {formatUsd(r.bill.amountDue)}</p>}
             {r.outcome === 'denied' && (
-              <p className="text-neutral-600 dark:text-neutral-400">
+              <p className="text-muted">
                 You can ask {c.eob.insurer} to confirm what you owe, or request an itemized bill if you haven&apos;t received one.
               </p>
             )}
             {r.outcome === 'more_info' && (
-              <p className="text-neutral-600 dark:text-neutral-400">Send what they asked for, quoting {caseRef(c.id)}, then log their next reply here.</p>
+              <p className="text-muted">Send what they asked for, quoting {caseRef(c.id)}, then log their next reply here.</p>
             )}
           </li>
         ))}

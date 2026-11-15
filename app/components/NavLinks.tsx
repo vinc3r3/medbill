@@ -20,7 +20,7 @@ export function NavLinks() {
             key={href}
             href={href}
             aria-current={active ? 'page' : undefined}
-            className={`rounded-md px-2.5 py-1.5 ${active ? 'bg-neutral-100 font-semibold dark:bg-neutral-800' : 'hover:bg-neutral-50 dark:hover:bg-neutral-900'}`}
+            className={`rounded-lg px-2.5 py-1.5 ${active ? 'bg-brand-soft font-semibold text-brand' : 'hover:bg-brand-soft'}`}
           >
             {label}
           </Link>

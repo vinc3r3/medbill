@@ -20,7 +20,7 @@ export function RedactedView({ billText, eobText }: { billText: string; eobText:
     <section className="flex flex-col gap-3 rounded-xl border border-emerald-500 p-4 dark:border-emerald-700">
       <div>
         <h2 className="text-lg font-semibold">What we&apos;ll send</h2>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-muted">
           {count} personal detail{count === 1 ? '' : 's'} removed (highlighted). Only this text leaves your device.
         </p>
       </div>

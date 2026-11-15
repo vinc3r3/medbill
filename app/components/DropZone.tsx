@@ -63,7 +63,7 @@ export function DropZone({ label, hint, file, onChange }: Props) {
       />
 
       {previewUrl && file ? (
-        <div className="flex flex-col gap-2 rounded-xl border border-neutral-300 p-3 dark:border-neutral-700">
+        <div className="card flex flex-col gap-2 p-3">
           {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview, not optimisable */}
           <img
             src={previewUrl}
@@ -71,7 +71,7 @@ export function DropZone({ label, hint, file, onChange }: Props) {
             className="max-h-96 w-full rounded-md bg-white object-contain object-top"
           />
           <div className="flex items-center justify-between gap-2 text-sm">
-            <span className="truncate text-neutral-600 dark:text-neutral-400" title={file.name}>
+            <span className="truncate text-muted" title={file.name}>
               {file.name}
             </span>
             <span className="flex shrink-0 gap-2">
@@ -104,14 +104,14 @@ export function DropZone({ label, hint, file, onChange }: Props) {
             setDragging(false);
             accept(e.dataTransfer.files);
           }}
-          className={`flex min-h-48 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed p-6 text-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+          className={`flex min-h-48 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed p-6 text-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
             dragging
-              ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/40'
-              : 'border-neutral-300 hover:border-neutral-500 dark:border-neutral-700'
+              ? 'border-brand bg-brand-soft'
+              : 'border-line bg-surface hover:border-brand'
           }`}
         >
           <span className="font-medium">Drop your {label.toLowerCase()} here</span>
-          <span className="text-sm text-neutral-600 dark:text-neutral-400">or click to choose a photo or scan</span>
+          <span className="text-sm text-muted">or click to choose a photo or scan</span>
           <span className="mt-2 text-xs text-neutral-500">{hint}</span>
         </label>
       )}

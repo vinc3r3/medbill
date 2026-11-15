@@ -1,10 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useHydrated } from '@/app/hooks/useHydrated';
 import { useProfile } from '@/app/hooks/useProfile';
 import { postJson } from '@/lib/api-client';
+import { caseChanged } from '@/app/cases/actions';
 import { isProfileEmpty } from '@/lib/profile';
 import { redact } from '@/lib/redact';
 import { OUTCOME_LABELS } from '@/lib/replies';
@@ -24,7 +24,6 @@ type State = { kind: 'idle' } | { kind: 'busy'; label: string } | { kind: 'error
  * redacted, and only the redacted text goes to /api/extract. The reply is then logged on the case.
  */
 export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: string }) {
-  const router = useRouter();
   const hydrated = useHydrated();
   const profile = useProfile();
   const [open, setOpen] = useState(false);
@@ -53,7 +52,7 @@ export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: strin
       setOpen(false);
       setOutcome(null);
       setFile(null);
-      router.refresh();
+      await caseChanged(caseId); // re-renders this page and refreshes the dashboard
     } catch (err) {
       setState({ kind: 'error', message: err instanceof Error ? err.message : 'Something went wrong. Please try again.' });
     }
@@ -66,7 +65,7 @@ export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: strin
         data-testid="got-reply"
         data-ready={hydrated || undefined}
         onClick={() => setOpen(true)}
-        className="self-start rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white"
+        className="btn btn-primary self-start"
       >
         I got a reply
       </button>
@@ -74,10 +73,10 @@ export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: strin
   }
 
   return (
-    <section aria-label="Log a reply" data-testid="reply-panel" className="flex flex-col gap-4 rounded-xl border border-blue-300 p-5 dark:border-blue-800">
+    <section aria-label="Log a reply" data-testid="reply-panel" className="card flex flex-col gap-4 border-brand/40">
       <div>
         <h2 className="text-lg font-semibold">What did the provider say?</h2>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="text-sm text-muted">
           Their reply should mention your reference <span className="font-mono font-semibold">{caseRef}</span>.
         </p>
       </div>
@@ -85,11 +84,11 @@ export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: strin
       <fieldset className="flex flex-col gap-2" disabled={busy}>
         <legend className="sr-only">Outcome</legend>
         {(Object.keys(OUTCOME_LABELS) as ReplyOutcome[]).map((o) => (
-          <label key={o} className="flex cursor-pointer gap-3 rounded-lg border border-neutral-300 p-3 has-[:checked]:border-blue-600 dark:border-neutral-700">
+          <label key={o} className="flex cursor-pointer gap-3 rounded-xl border border-line bg-surface p-3 has-[:checked]:border-brand has-[:checked]:bg-brand-soft">
             <input type="radio" name="outcome" value={o} checked={outcome === o} onChange={() => setOutcome(o)} className="mt-1" />
             <span>
               <span className="font-medium">{OUTCOME_LABELS[o]}</span>
-              <span className="block text-sm text-neutral-600 dark:text-neutral-400">{OUTCOME_HINTS[o]}</span>
+              <span className="block text-sm text-muted">{OUTCOME_HINTS[o]}</span>
             </span>
           </label>
         ))}
@@ -98,7 +97,7 @@ export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: strin
       {needsFile && (
         <>
           <DropZone label="Statement" hint="A photo or scan of the corrected statement" file={file} onChange={setFile} />
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          <p className="text-sm text-muted">
             {profileReady
               ? 'The text is read on this device and your personal details are removed before anything is sent.'
               : 'Save your details in Settings first, so your name and address are removed before sending.'}
@@ -111,7 +110,7 @@ export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: strin
           type="button"
           onClick={save}
           disabled={!canSave}
-          className="rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white disabled:cursor-not-allowed disabled:bg-neutral-400"
+          className="btn btn-primary"
         >
           {busy ? 'Saving…' : 'Save reply'}
         </button>
@@ -119,7 +118,7 @@ export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: strin
           Cancel
         </button>
         {state.kind === 'busy' && (
-          <p role="status" className="text-sm text-neutral-600 dark:text-neutral-400">
+          <p role="status" className="text-sm text-muted">
             {state.label}…
           </p>
         )}
