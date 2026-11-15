@@ -47,5 +47,8 @@ export async function extractDoc<T extends DocType>(docType: T, redactedText: st
     if (result.success) return result.data as ExtractedDoc<T>;
     lastProblem = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).slice(0, 3).join('; ');
   }
-  throw new ExtractError(`We couldn't read the details of your ${label} reliably (${lastProblem}). Try a clearer photo or scan.`);
+  console.error(`extract ${docType}: unusable AI output after retry: ${lastProblem}`);
+  throw new ExtractError(
+    `We couldn't read the details of your ${label} reliably. Try a clearer, straight-on photo or scan of the whole page.`,
+  );
 }

@@ -34,10 +34,14 @@ describe('extractDoc', () => {
 
   it('gives a readable error after the retry also fails', async () => {
     const call = vi.fn<CallModel>().mockResolvedValue({ ...goodBill, serviceDate: 'March 4' });
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     const err = await extractDoc('bill', 'text', call).catch((e) => e);
     expect(err).toBeInstanceOf(ExtractError);
     expect(err.message).toMatch(/couldn't read the details of your bill/);
-    expect(err.message).toMatch(/serviceDate/);
+    // Plain language for the user; the technical reason goes to the server log only.
+    expect(err.message).not.toMatch(/serviceDate|expected|JSON/);
+    expect(String(log.mock.calls[0])).toMatch(/serviceDate/);
+    log.mockRestore();
     expect(call).toHaveBeenCalledTimes(2);
   });
 });

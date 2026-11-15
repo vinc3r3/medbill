@@ -18,7 +18,8 @@ export function SimulateDeliveryButton({ caseId }: { caseId: string }) {
           setError(null);
           try {
             await postJson(`/api/cases/${caseId}/simulate-delivery`, {});
-            await caseChanged(caseId); // re-renders this page and refreshes the dashboard
+            // Re-renders this page and refreshes the dashboard; the change is already saved, so a failure here just reloads.
+            await caseChanged(caseId).catch(() => window.location.reload());
           } catch (err) {
             setError(err instanceof Error ? err.message : 'Could not simulate delivery.');
           } finally {

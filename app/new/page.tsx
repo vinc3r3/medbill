@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { ProfileForm } from '../components/ProfileForm';
 import { RequireUser } from '../components/RequireUser';
+import { FormSkeleton } from '../components/Skeleton';
 import { UploadForm } from '../components/UploadForm';
 
 export const metadata: Metadata = { title: 'New check · MedBill Checker' };
@@ -16,7 +17,7 @@ export default function NewCheckPage() {
           worth a second look and help you ask about them.
         </p>
       </header>
-      <Suspense fallback={<p className="text-muted">Loading…</p>}>
+      <Suspense fallback={<FormSkeleton />}>
         <RequireUser next="/new">
           <ProfileForm />
           <UploadForm />

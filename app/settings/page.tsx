@@ -4,6 +4,7 @@ import { signOut } from '@/app/(auth)/actions';
 import { getCurrentUser } from '@/lib/auth';
 import { ProfileForm } from '../components/ProfileForm';
 import { RequireUser } from '../components/RequireUser';
+import { FormSkeleton } from '../components/Skeleton';
 
 export const metadata: Metadata = { title: 'Settings · MedBill Checker' };
 
@@ -46,7 +47,7 @@ export default function SettingsPage() {
         <h1 className="text-3xl font-semibold tracking-tight">Settings</h1>
         <p className="text-muted">Your personal details, account and plan.</p>
       </header>
-      <Suspense fallback={<p className="text-muted">Loading…</p>}>
+      <Suspense fallback={<FormSkeleton />}>
         <RequireUser next="/settings">
           <ProfileForm />
           <Plan />

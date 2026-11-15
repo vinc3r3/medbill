@@ -11,24 +11,27 @@ type Props = {
   onChange: (file: File | null) => void;
 };
 
+/**
+ * Preview of whatever file is shown, whether the user picked it or the page set it (a sample). The object
+ * URL is created and revoked in an effect, so it follows the file and never leaks.
+ */
+function FilePreview({ file, alt }: { file: File; alt: string }) {
+  const img = useRef<HTMLImageElement>(null);
+  useEffect(() => {
+    const url = URL.createObjectURL(file);
+    if (img.current) img.current.src = url;
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+  // eslint-disable-next-line @next/next/no-img-element -- local blob preview, not optimisable
+  return <img ref={img} alt={alt} className="max-h-96 min-h-24 w-full rounded-md bg-white object-contain object-top" />;
+}
+
 export function DropZone({ label, hint, file, onChange }: Props) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Object URL for the preview, created when a file is picked and revoked when replaced, removed or unmounted.
-  const [preview, setPreview] = useState<{ file: File; url: string } | null>(null);
-  const liveUrl = useRef<string | null>(null); // mirrors preview.url, for the unmount cleanup
-  useEffect(() => () => {
-    if (liveUrl.current) URL.revokeObjectURL(liveUrl.current);
-  }, []);
-  const previewUrl = preview && preview.file === file ? preview.url : null;
-
   function setFile(next: File | null) {
-    if (liveUrl.current) URL.revokeObjectURL(liveUrl.current);
-    const url = next ? URL.createObjectURL(next) : null;
-    liveUrl.current = url;
-    setPreview(next && url ? { file: next, url } : null);
     onChange(next);
   }
 
@@ -62,14 +65,9 @@ export function DropZone({ label, hint, file, onChange }: Props) {
         }}
       />
 
-      {previewUrl && file ? (
+      {file ? (
         <div className="card flex flex-col gap-2 p-3">
-          {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview, not optimisable */}
-          <img
-            src={previewUrl}
-            alt={`${label} preview`}
-            className="max-h-96 w-full rounded-md bg-white object-contain object-top"
-          />
+          <FilePreview file={file} alt={`${label} preview`} />
           <div className="flex items-center justify-between gap-2 text-sm">
             <span className="truncate text-muted" title={file.name}>
               {file.name}

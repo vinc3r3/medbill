@@ -8,6 +8,7 @@ import { formatUsd, formatUsDate } from '@/lib/format';
 import { isReminderDue } from '@/lib/tracking';
 import type { Case } from '@/lib/types';
 import { StatusChip } from '../components/StatusChip';
+import { DemoControls } from './DemoControls';
 
 export async function DashboardContent() {
   await connection();
@@ -47,6 +48,7 @@ export async function DashboardContent() {
           ))}
         </ul>
       )}
+      <DemoControls caseCount={cases.length} />
     </>
   );
 }

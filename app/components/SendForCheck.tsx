@@ -54,7 +54,7 @@ export function SendForCheck({
       step = 'check';
       setState({ kind: 'running', step });
       await postJson<Flag[]>('/api/check', { caseId: created.id });
-      await caseChanged(created.id);
+      await caseChanged(created.id).catch(() => {}); // the case is saved either way
       router.push(`/cases/${created.id}`);
     } catch (err) {
       setState({ kind: 'error', step, message: err instanceof Error ? err.message : 'Something went wrong. Please try again.' });

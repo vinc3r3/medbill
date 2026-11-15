@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useHydrated } from '@/app/hooks/useHydrated';
 import { useProfile } from '@/app/hooks/useProfile';
+import { SAMPLE_KEYS, SAMPLE_LABELS, sampleFile, type SampleKey } from '@/lib/demo';
 import { isProfileEmpty } from '@/lib/profile';
 import { redact } from '@/lib/redact';
 import { DropZone } from './DropZone';
@@ -35,6 +36,19 @@ export function UploadForm() {
 
   // Changing a document invalidates the text read from the old one.
   const resetOcr = () => setOcr({ kind: 'idle' });
+
+  const [sampleError, setSampleError] = useState<string | null>(null);
+  async function loadSample(key: SampleKey) {
+    setSampleError(null);
+    try {
+      const [b, e] = await Promise.all([sampleFile(key, 'bill'), sampleFile(key, 'eob')]);
+      setBill(b);
+      setEob(e);
+      resetOcr();
+    } catch (err) {
+      setSampleError(err instanceof Error ? err.message : "Couldn't load the sample.");
+    }
+  }
 
   async function readDocuments(billFile: File, eobFile: File) {
     setOcr({ kind: 'reading', label: 'Getting ready', percent: 0 });
@@ -81,6 +95,19 @@ export function UploadForm() {
             resetOcr();
           }}
         />
+      </div>
+      <div className="flex flex-wrap items-center gap-2 text-sm" data-testid="samples">
+        <span className="text-muted">No bill handy? Try a sample:</span>
+        {SAMPLE_KEYS.map((k) => (
+          <button key={k} type="button" disabled={reading} onClick={() => void loadSample(k)} className="btn btn-secondary px-3 py-1 text-sm">
+            {SAMPLE_LABELS[k]}
+          </button>
+        ))}
+        {sampleError && (
+          <span role="alert" className="text-red-700 dark:text-red-400">
+            {sampleError}
+          </span>
+        )}
       </div>
       <p className="text-sm text-muted">
         Your documents stay on this device. Text is read here, and personal details are removed before anything is

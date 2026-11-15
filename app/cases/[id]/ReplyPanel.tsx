@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useHydrated } from '@/app/hooks/useHydrated';
 import { useProfile } from '@/app/hooks/useProfile';
 import { postJson } from '@/lib/api-client';
+import { sampleFile } from '@/lib/demo';
 import { caseChanged } from '@/app/cases/actions';
 import { isProfileEmpty } from '@/lib/profile';
 import { redact } from '@/lib/redact';
@@ -23,7 +24,7 @@ type State = { kind: 'idle' } | { kind: 'busy'; label: string } | { kind: 'error
  * "I got a reply": the user picks the outcome; for a corrected statement the photo is read on this device,
  * redacted, and only the redacted text goes to /api/extract. The reply is then logged on the case.
  */
-export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: string }) {
+export function ReplyPanel({ caseId, caseRef, sampleReply = false }: { caseId: string; caseRef: string; sampleReply?: boolean }) {
   const hydrated = useHydrated();
   const profile = useProfile();
   const [open, setOpen] = useState(false);
@@ -52,7 +53,8 @@ export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: strin
       setOpen(false);
       setOutcome(null);
       setFile(null);
-      await caseChanged(caseId); // re-renders this page and refreshes the dashboard
+      // Re-renders this page and refreshes the dashboard; the change is already saved, so a failure here just reloads.
+      await caseChanged(caseId).catch(() => window.location.reload());
     } catch (err) {
       setState({ kind: 'error', message: err instanceof Error ? err.message : 'Something went wrong. Please try again.' });
     }
@@ -97,6 +99,16 @@ export function ReplyPanel({ caseId, caseRef }: { caseId: string; caseRef: strin
       {needsFile && (
         <>
           <DropZone label="Statement" hint="A photo or scan of the corrected statement" file={file} onChange={setFile} />
+          {sampleReply && !file && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => sampleFile('c', 'corrected').then(setFile, (err) => setState({ kind: 'error', message: err.message }))}
+              className="btn btn-secondary self-start px-3 py-1 text-sm"
+            >
+              Demo: use the sample corrected statement
+            </button>
+          )}
           <p className="text-sm text-muted">
             {profileReady
               ? 'The text is read on this device and your personal details are removed before anything is sent.'

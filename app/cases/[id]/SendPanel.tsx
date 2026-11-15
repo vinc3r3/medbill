@@ -53,7 +53,8 @@ export function SendPanel({ caseId, providerName, filledLetter }: { caseId: stri
     const clean = (c: Contact) => ({ ...c, addressLine2: c.addressLine2?.trim() || undefined });
     try {
       await postJson('/api/send', { caseId, letterText: filledLetter, to: clean(to), from: clean(from) });
-      await caseChanged(caseId); // re-renders this page and refreshes the dashboard
+      // Re-renders this page and refreshes the dashboard; the change is already saved, so a failure here just reloads.
+      await caseChanged(caseId).catch(() => window.location.reload());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'We could not send your letter.');
       setSending(false);

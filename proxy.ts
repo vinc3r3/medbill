@@ -48,5 +48,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Everything except static assets, OCR files and the signature-verified webhooks.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|tesseract/|api/mail-webhook|api/stripe-webhook).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|tesseract/|samples/|api/mail-webhook|api/stripe-webhook).*)'],
 };

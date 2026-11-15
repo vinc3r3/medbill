@@ -15,6 +15,7 @@ import { SimulateDeliveryButton } from './SimulateDeliveryButton';
 import { LetterEditor } from './LetterEditor';
 import { ReplyPanel } from './ReplyPanel';
 import { Timeline } from './Timeline';
+import { isSampleC } from '@/lib/demo';
 import { BillTable, EobTable } from './LineTables';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -85,7 +86,7 @@ function ReviewView({ c }: { c: Case }) {
 
       {c.replies.length > 0 && <ReplyHistory c={c} />}
 
-      {(c.status === 'sent' || c.status === 'delivered') && <ReplyPanel caseId={c.id} caseRef={caseRef(c.id)} />}
+      {(c.status === 'sent' || c.status === 'delivered') && <ReplyPanel caseId={c.id} caseRef={caseRef(c.id)} sampleReply={isSampleC(c)} />}
 
       {c.flags.length > 0 && (
         <section aria-label="Items to question" className="flex flex-col gap-3">

@@ -142,8 +142,11 @@ are verified by signature.
     tables once sent. Stale dashboard fixed with a `caseChanged` server action (`revalidatePath`) after each
     mutation. Check: `npm run e2e:frontend` (390px, landing → sign up → … → resolved; no stale status).
 
-- [ ] **19. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
+- [x] **19. Polish the demo.** Seed and reset buttons, loading states, readable error messages.
   - Done when: the full demo runs three times in a row without a restart.
+  - Note: "Demo tools" on the dashboard (seed A/B/C via server actions, no AI; reset with confirm); sample buttons
+    on `/new` (images copied to `public/samples` on install); skeletons, `error.tsx`, friendly `not-found.tsx`.
+    Check: `npm run e2e:demo` (3 runs, ~20s each, no console errors).
 
 ## Stretch
 

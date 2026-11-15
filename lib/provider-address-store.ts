@@ -21,3 +21,13 @@ export function loadProviderAddress(caseId: string): UsAddress | null {
     return null;
   }
 }
+
+/** Forgets every stored provider address (demo reset). */
+export function clearProviderAddresses(): void {
+  try {
+    const keys = Object.keys(window.localStorage).filter((k) => k.startsWith('medbill.providerAddress.'));
+    for (const k of keys) window.localStorage.removeItem(k);
+  } catch {
+    // storage blocked: nothing stored either
+  }
+}

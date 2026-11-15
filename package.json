@@ -12,7 +12,7 @@
     "test:db": "VITEST_INTEGRATION=1 vitest run tests/db.integration.test.ts",
     "samples": "node scripts/make-samples.mjs",
     "e2e:upload": "node scripts/e2e-upload.mjs",
-    "postinstall": "node scripts/copy-tesseract.mjs",
+    "postinstall": "node scripts/copy-tesseract.mjs && node scripts/copy-samples.mjs",
     "e2e:ocr": "node scripts/e2e-ocr.mjs",
     "samples:ocr": "node scripts/ocr-fixtures.mjs",
     "e2e:redact": "node scripts/e2e-redact.mjs",
@@ -26,7 +26,8 @@
     "e2e:track": "node scripts/e2e-track.mjs",
     "e2e:dashboard": "node scripts/e2e-dashboard.mjs",
     "e2e:reply": "node scripts/e2e-reply.mjs",
-    "e2e:frontend": "node scripts/e2e-frontend.mjs"
+    "e2e:frontend": "node scripts/e2e-frontend.mjs",
+    "e2e:demo": "node scripts/e2e-demo.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

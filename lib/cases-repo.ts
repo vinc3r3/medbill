@@ -99,3 +99,10 @@ export async function findCaseByMailLetterId(mailLetterId: string): Promise<{ id
   if (error) throw new Error(`Could not look up letter: ${error.message}`);
   return data ? { id: data.id, userId: data.user_id, status: data.status } : null;
 }
+
+/** Deletes every case of this user (demo reset). Returns how many were removed. */
+export async function deleteAllCases(userId: string): Promise<number> {
+  const { data, error } = await db().from('cases').delete().eq('user_id', userId).select('id');
+  if (error) throw new Error(`Could not delete cases: ${error.message}`);
+  return data.length;
+}
