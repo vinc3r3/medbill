@@ -20,9 +20,12 @@ export type Flag = {
   explanation: string;  // plain language, phrased as a question to verify
 };
 
+export type ReplyOutcome = 'corrected' | 'denied' | 'more_info';
+export type Reply = { outcome: ReplyOutcome; receivedAt: string; bill: BillDoc | null };
+
 export type CaseStatus = 'uploaded' | 'checked' | 'letter_ready' | 'sent' | 'delivered' | 'resolved';
 export type Case = {
   id: string; status: CaseStatus; bill: BillDoc; eob: EobDoc; flags: Flag[];
   letter: string | null; mailLetterId: string | null; previewUrl: string | null; sentAt: string | null;
-  savedAmount: number; createdAt: string;
+  savedAmount: number; createdAt: string; replies: Reply[];
 };

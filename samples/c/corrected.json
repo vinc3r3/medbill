@@ -1,0 +1,19 @@
+{
+  "provider": "Summit Urgent Care",
+  "serviceDate": "2026-07-21",
+  "lines": [
+    {
+      "date": "2026-07-21",
+      "code": "99204",
+      "description": "Office visit, new patient, moderate",
+      "billed": 35
+    },
+    {
+      "date": "2026-07-21",
+      "code": "73610",
+      "description": "X-ray, ankle, 3 views",
+      "billed": 10
+    }
+  ],
+  "amountDue": 45
+}

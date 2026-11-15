@@ -13,6 +13,7 @@ const row: CaseRow = {
   sent_at: null,
   saved_amount: '367.00',
   created_at: '2026-01-02T00:00:00Z',
+  replies: null, // rows from before migration 0005 have no replies column value
 };
 
 describe('rowToCase', () => {
@@ -22,10 +23,16 @@ describe('rowToCase', () => {
     expect(c.sentAt).toBeNull();
     expect(c.savedAmount).toBe(367);
     expect(c.createdAt).toBe('2026-01-02T00:00:00Z');
+    expect(c.replies).toEqual([]);
   });
 });
 
 describe('patchToRow', () => {
+  it('maps replies', () => {
+    const replies = [{ outcome: 'denied' as const, receivedAt: '2026-11-15T00:00:00Z', bill: null }];
+    expect(patchToRow({ status: 'resolved', savedAmount: 367, replies })).toEqual({ status: 'resolved', saved_amount: 367, replies });
+  });
+
   it('only includes fields that were given', () => {
     expect(patchToRow({ status: 'sent', mailLetterId: 'letter_1', sentAt: '2026-11-14T00:00:00Z' })).toEqual({
       status: 'sent', mail_letter_id: 'letter_1', sent_at: '2026-11-14T00:00:00Z',

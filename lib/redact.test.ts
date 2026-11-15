@@ -54,6 +54,24 @@ describe.each(['a', 'b', 'c'] as const)('sample %s (real OCR text)', (key) => {
   });
 });
 
+describe("case C's corrected statement (a provider reply, Task 15)", () => {
+  const text = redact(ocr('c', 'corrected'), profile);
+  const corrected = JSON.parse(readFileSync(join(SAMPLES, 'c', 'corrected.json'), 'utf8'));
+
+  it('removes every profile value and the account number', () => {
+    for (const value of Object.values(profile)) expectGone(text, value);
+    for (const part of ['Jordan', 'Rivera', '1427 Maple Grove', '45099', ACCOUNTS.c]) expectGone(text, part);
+  });
+
+  it('keeps the lines and the new amount due', () => {
+    for (const line of corrected.lines) {
+      expect(text).toContain(line.code);
+      expect(text).toContain(`$${line.billed.toFixed(2)}`);
+    }
+    expect(text).toContain('$45.00');
+  });
+});
+
 describe('profile values', () => {
   const p: Profile = { name: 'Jordan A. Rivera', dateOfBirth: '1984-03-17', memberId: 'XKH448210937', address: '1427 Maple Grove Ln, Fairhaven, OH 45099' };
 

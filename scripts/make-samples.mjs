@@ -1,7 +1,9 @@
 // Generates the synthetic sample cases in /samples/{a,b,c}: {key}-bill.png, {key}-eob.png, expected.json,
-// plus samples/profile.json. All people, addresses, IDs and organisations are invented.
+// plus samples/profile.json, and case C's corrected statement (c-corrected.png + corrected.json, Task 15:
+// the provider's reply after the dispute letter). All people, addresses, IDs and organisations are invented.
 //
 // Usage: npm run samples   (needs Google Chrome installed; set CHROME=/path/to/chrome to override)
+//        npm run samples -- --corrected-only   (only the corrected statement)
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -113,15 +115,16 @@ const PAGE_CSS = `
   .banner { background: #eee; border: 1.5px solid #222; padding: 8px 12px; font-weight: bold; text-align: center; margin-top: 18px; }
 `;
 
-function billHtml(key, c, bill) {
+function billHtml(key, c, bill, { title = 'PATIENT STATEMENT', statementDate = c.statementDate, note = '' } = {}) {
   const rows = bill.lines
     .map((l) => `<tr><td>${us(l.date)}</td><td>${l.code ?? ''}</td><td>${esc(l.description)}</td><td class="n">${usd(l.billed)}</td></tr>`)
     .join('');
   return `<!doctype html><html><head><meta charset="utf-8"><style>${PAGE_CSS}</style></head><body>
   <div class="row"><div><h1>${esc(c.provider.name)}</h1><div class="muted">${esc(c.provider.address)}<br>Billing questions: ${c.provider.phone}</div></div>
-  <div style="text-align:right"><div class="big">PATIENT STATEMENT</div><div>Statement date: ${us(c.statementDate)}</div><div>Account #: ${accountNumbers[key]}</div></div></div>
+  <div style="text-align:right"><div class="big">${title}</div><div>Statement date: ${us(statementDate)}</div><div>Account #: ${accountNumbers[key]}</div></div></div>
   <div class="box row"><div><b>Patient</b><br>${esc(profile.name)}<br>${esc(profile.address)}<br>DOB: ${profile.dateOfBirth}</div>
   <div><b>Insurance</b><br>${esc(c.insurer)}<br>Member ID: ${profile.memberId}</div></div>
+  ${note ? `<p style="margin-top:18px">${esc(note)}</p>` : ''}
   <h2>Services</h2>
   <table><thead><tr><th>Date</th><th>Code</th><th>Description</th><th class="n">Patient amount</th></tr></thead>
   <tbody>${rows}<tr class="total"><td colspan="3">Amount due</td><td class="n">${usd(bill.amountDue)}</td></tr></tbody></table>
@@ -156,12 +159,27 @@ function render(htmlPath, pngPath) {
   ], { stdio: 'ignore' });
 }
 
+/** Case C after the dispute: each line re-billed at the EOB's patient responsibility, so $45 is due. */
+function correctedStatement() {
+  const c = cases.c;
+  const { eob } = buildDocs(c);
+  const lines = eob.lines.map(({ date, code, description, patientResponsibility }) => ({ date, code, description, billed: patientResponsibility }));
+  const bill = { provider: c.provider.name, serviceDate: c.lines[0].date, lines, amountDue: sum(lines.map((l) => l.billed)) };
+  const html = billHtml('c', c, bill, {
+    title: 'CORRECTED STATEMENT',
+    statementDate: '2026-11-10',
+    note: `Following your inquiry, we have applied the ${c.insurer} payment and contractual adjustments to this account.`,
+  });
+  return { bill, html };
+}
+
 // ---- Main -----------------------------------------------------------------------------------
 const tmp = join(ROOT, '.html');
 mkdirSync(tmp, { recursive: true });
-writeFileSync(join(ROOT, 'profile.json'), JSON.stringify(profile, null, 2) + '\n');
+const correctedOnly = process.argv.includes('--corrected-only');
+if (!correctedOnly) writeFileSync(join(ROOT, 'profile.json'), JSON.stringify(profile, null, 2) + '\n');
 
-for (const [key, c] of Object.entries(cases)) {
+for (const [key, c] of correctedOnly ? [] : Object.entries(cases)) {
   const dir = join(ROOT, key);
   mkdirSync(dir, { recursive: true });
   const { bill, eob } = buildDocs(c);
@@ -172,5 +190,13 @@ for (const [key, c] of Object.entries(cases)) {
     render(htmlPath, join(dir, `${key}-${name}.png`));
   }
   console.log(`case ${key}: amountDue ${usd(bill.amountDue)}, EOB total ${usd(eob.totalPatientResponsibility)}, ${c.flags.length} flag(s)`);
+}
+{
+  const { bill, html } = correctedStatement();
+  writeFileSync(join(ROOT, 'c', 'corrected.json'), JSON.stringify(bill, null, 2) + '\n');
+  const htmlPath = join(tmp, 'c-corrected.html');
+  writeFileSync(htmlPath, html);
+  render(htmlPath, join(ROOT, 'c', 'c-corrected.png'));
+  console.log(`case c corrected statement: amountDue ${usd(bill.amountDue)}`);
 }
 rmSync(tmp, { recursive: true, force: true });

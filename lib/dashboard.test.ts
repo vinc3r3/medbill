@@ -5,7 +5,7 @@ import type { Case, CaseStatus } from './types';
 
 const c = (status: CaseStatus, savedAmount: number): Case => ({
   id: `${status}-${savedAmount}`, status, savedAmount, flags: [], letter: null, mailLetterId: null, previewUrl: null, sentAt: null,
-  createdAt: '2026-11-15T00:00:00Z',
+  createdAt: '2026-11-15T00:00:00Z', replies: [],
   bill: { provider: 'P', serviceDate: '2026-01-01', lines: [], amountDue: 0 },
   eob: { insurer: 'I', claimId: 'C', lines: [], totalPatientResponsibility: 0 },
 });

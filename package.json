@@ -24,7 +24,8 @@
     "e2e:auth": "node scripts/e2e-auth.mjs",
     "postgrid:webhook": "node scripts/postgrid-webhook.mjs",
     "e2e:track": "node scripts/e2e-track.mjs",
-    "e2e:dashboard": "node scripts/e2e-dashboard.mjs"
+    "e2e:dashboard": "node scripts/e2e-dashboard.mjs",
+    "e2e:reply": "node scripts/e2e-reply.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

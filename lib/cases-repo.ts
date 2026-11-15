@@ -2,7 +2,7 @@
 // every user-facing function takes the signed-in user's id and filters by it.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { requireEnv } from './env';
-import type { BillDoc, Case, CaseStatus, EobDoc, Flag } from './types';
+import type { BillDoc, Case, CaseStatus, EobDoc, Flag, Reply } from './types';
 
 export type CaseRow = {
   id: string;
@@ -17,6 +17,7 @@ export type CaseRow = {
   sent_at: string | null;
   saved_amount: number | string; // Postgres numeric may arrive as a string
   created_at: string;
+  replies: Reply[] | null;
 };
 
 export function rowToCase(row: CaseRow): Case {
@@ -32,10 +33,11 @@ export function rowToCase(row: CaseRow): Case {
     sentAt: row.sent_at,
     savedAmount: Number(row.saved_amount),
     createdAt: row.created_at,
+    replies: row.replies ?? [],
   };
 }
 
-type CasePatch = Partial<Pick<Case, 'status' | 'flags' | 'letter' | 'mailLetterId' | 'previewUrl' | 'sentAt' | 'savedAmount'>>;
+type CasePatch = Partial<Pick<Case, 'status' | 'flags' | 'letter' | 'mailLetterId' | 'previewUrl' | 'sentAt' | 'savedAmount' | 'replies'>>;
 
 export function patchToRow(patch: CasePatch): Partial<CaseRow> {
   const row: Partial<CaseRow> = {};
@@ -46,6 +48,7 @@ export function patchToRow(patch: CasePatch): Partial<CaseRow> {
   if (patch.previewUrl !== undefined) row.preview_url = patch.previewUrl;
   if (patch.sentAt !== undefined) row.sent_at = patch.sentAt;
   if (patch.savedAmount !== undefined) row.saved_amount = patch.savedAmount;
+  if (patch.replies !== undefined) row.replies = patch.replies;
   return row;
 }
 

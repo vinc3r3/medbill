@@ -15,7 +15,7 @@ function sampleCase(key: string): Case {
   const flags = checkFlags(exp.bill, exp.eob);
   return {
     id: '00000000-0000-4000-8000-000000000000', status: 'checked', bill: exp.bill, eob: exp.eob, flags,
-    letter: null, mailLetterId: null, previewUrl: null, sentAt: null, savedAmount: savedAmount(flags), createdAt: '2026-11-14T00:00:00Z',
+    letter: null, mailLetterId: null, previewUrl: null, sentAt: null, savedAmount: savedAmount(flags), createdAt: '2026-11-14T00:00:00Z', replies: [],
   };
 }
 const TODAY = '2026-11-14';
@@ -72,6 +72,10 @@ describe('every letter', () => {
       expect(letter).toMatch(/thank you/i);
       expect(letter).not.toMatch(/\b(lawsuit|sue|attorney|lawyer|legal action|violat\w*|illegal|fraud\w*|demand\w*|liable|statute)\b/i);
     }
+  });
+
+  it('carries the case reference so a reply can be matched (Ref: MB- + first 4 hex of the id)', () => {
+    for (const letter of letters) expect(letter).toContain('Ref: MB-0000');
   });
 
   it('includes the letter date', () => {

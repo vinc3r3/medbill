@@ -5,12 +5,14 @@ import { getCurrentUser } from '@/lib/auth';
 import { getCase } from '@/lib/cases-repo';
 import { formatUsd, formatUsDate } from '@/lib/format';
 import { FLAG_LABELS, rowMarks } from '@/lib/review';
+import { OUTCOME_LABELS, caseRef, questionedAmount, remainingFlags } from '@/lib/replies';
 import type { Case, Flag } from '@/lib/types';
 import { isReminderDue, reminderDate } from '@/lib/tracking';
 import { StatusChip } from '../../components/StatusChip';
 import { FlagBadge } from './FlagBadge';
 import { SimulateDeliveryButton } from './SimulateDeliveryButton';
 import { LetterEditor } from './LetterEditor';
+import { ReplyPanel } from './ReplyPanel';
 import { BillTable, EobTable } from './LineTables';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -28,7 +30,7 @@ export async function CaseReview({ params }: { params: Promise<{ id: string }> }
 
 function ReviewView({ c }: { c: Case }) {
   const marks = rowMarks(c.flags);
-  const toQuestion = c.savedAmount;
+  const toQuestion = questionedAmount(c);
 
   return (
     <>
@@ -45,33 +47,37 @@ function ReviewView({ c }: { c: Case }) {
         </p>
       </header>
 
-      <section
-        aria-label="Summary"
-        className={`rounded-xl border p-5 ${toQuestion > 0 ? 'border-amber-400 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30' : 'border-emerald-400 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/30'}`}
-      >
-        {toQuestion > 0 ? (
-          <>
-            <p data-testid="to-question" className="text-3xl font-bold">
-              {formatUsd(toQuestion, { compact: true })} to question
-            </p>
-            <p className="mt-1 text-neutral-700 dark:text-neutral-300">
-              {c.flags.length} item{c.flags.length === 1 ? '' : 's'} worth asking the provider about. These are questions to
-              verify, not proof of an error.
-            </p>
-          </>
-        ) : (
-          <>
-            <p data-testid="to-question" className="text-3xl font-bold">
-              Nothing to question
-            </p>
-            <p className="mt-1 text-neutral-700 dark:text-neutral-300">Your bill matches what your EOB says you owe.</p>
-          </>
-        )}
-      </section>
+      {c.status === 'resolved' ? (
+        <ResolvedSummary c={c} />
+      ) : (
+        <section
+          aria-label="Summary"
+          className={`rounded-xl border p-5 ${toQuestion > 0 ? 'border-amber-400 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30' : 'border-emerald-400 bg-emerald-50 dark:border-emerald-700 dark:bg-emerald-950/30'}`}
+        >
+          {toQuestion > 0 ? (
+            <>
+              <p data-testid="to-question" className="text-3xl font-bold">
+                {formatUsd(toQuestion, { compact: true })} to question
+              </p>
+              <p className="mt-1 text-neutral-700 dark:text-neutral-300">
+                {c.flags.length} item{c.flags.length === 1 ? '' : 's'} worth asking the provider about. These are questions to
+                verify, not proof of an error.
+              </p>
+            </>
+          ) : (
+            <>
+              <p data-testid="to-question" className="text-3xl font-bold">
+                Nothing to question
+              </p>
+              <p className="mt-1 text-neutral-700 dark:text-neutral-300">Your bill matches what your EOB says you owe.</p>
+            </>
+          )}
+        </section>
+      )}
 
       {c.flags.length > 0 && (
         <section aria-label="Items to question" className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">What to ask about</h2>
+          <h2 className="text-lg font-semibold">{c.status === 'resolved' ? 'What the letter asked about' : 'What to ask about'}</h2>
           <ol className="flex flex-col gap-3">
             {c.flags.map((flag, i) => (
               <FlagCard key={i} n={i + 1} flag={flag} />
@@ -86,6 +92,10 @@ function ReviewView({ c }: { c: Case }) {
       </section>
 
       {c.mailLetterId && <SentPanel c={c} />}
+
+      {c.replies.length > 0 && <ReplyHistory c={c} />}
+
+      {(c.status === 'sent' || c.status === 'delivered') && <ReplyPanel caseId={c.id} caseRef={caseRef(c.id)} />}
 
       {c.flags.length > 0 && (c.status === 'checked' || c.status === 'letter_ready') && (
         <LetterEditor caseId={c.id} initialLetter={c.letter} providerName={c.bill.provider} />
@@ -113,9 +123,10 @@ function FlagCard({ n, flag }: { n: number; flag: Flag }) {
 function SentPanel({ c }: { c: Case }) {
   const fmt = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
   const sentOn = c.sentAt ? fmt(c.sentAt) : null;
-  const followUp = reminderDate(c.sentAt);
+  // A resolved case needs no follow-up; it may also have been resolved before delivery was reported.
+  const followUp = c.status === 'resolved' ? null : reminderDate(c.sentAt);
   const due = isReminderDue(c.sentAt, c.status);
-  const delivered = c.status === 'delivered' || c.status === 'resolved';
+  const delivered = c.status === 'delivered';
   return (
     <section
       aria-label="Letter sent"
@@ -128,14 +139,15 @@ function SentPanel({ c }: { c: Case }) {
         <span className="text-sm font-normal text-neutral-600 dark:text-neutral-400">(test mode: not actually mailed)</span>
       </p>
       <p className="text-sm text-neutral-700 dark:text-neutral-300">
-        Status: <span data-testid="case-status" className="font-semibold">{c.status}</span> · Letter ID{' '}
+        Status: <span data-testid="case-status" className="font-semibold">{c.status}</span> · Ref{' '}
+        <span className="font-mono font-semibold">{caseRef(c.id)}</span> · Letter ID{' '}
         <code className="text-xs">{c.mailLetterId}</code>
       </p>
       {followUp && (
         <p data-testid="reminder" className={`text-sm ${due ? 'font-semibold text-amber-800 dark:text-amber-300' : 'text-neutral-700 dark:text-neutral-300'}`}>
           {due
-            ? `Follow up now: it's been 30 days since you sent the letter (${fmt(followUp)}).`
-            : `Reminder: if you haven't heard back by ${fmt(followUp)}, follow up with the billing office.`}
+            ? `Follow up now: it's been 30 days since you sent the letter (${fmt(followUp)})${c.replies.length ? '' : ' and no reply is logged'}. Send a follow-up letter or call the billing office, quoting ${caseRef(c.id)}.`
+            : `Reminder: if you haven't heard back by ${fmt(followUp)}, send a follow-up letter quoting ${caseRef(c.id)}.`}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-4">
@@ -144,6 +156,57 @@ function SentPanel({ c }: { c: Case }) {
         </a>
         {c.status === 'sent' && <SimulateDeliveryButton caseId={c.id} />}
       </div>
+    </section>
+  );
+}
+
+function ResolvedSummary({ c }: { c: Case }) {
+  const latest = c.replies.findLast((r) => r.outcome === 'corrected' && r.bill)?.bill ?? null;
+  const left = remainingFlags(c) ?? [];
+  const stillOver = left.find((f) => f.kind === 'over_patient_responsibility')?.difference ?? 0;
+  return (
+    <section
+      aria-label="Summary"
+      className="rounded-xl border border-emerald-400 bg-emerald-50 p-5 dark:border-emerald-700 dark:bg-emerald-950/30"
+    >
+      <p data-testid="saved-amount" className="text-3xl font-bold">
+        {formatUsd(c.savedAmount, { compact: true })} saved
+      </p>
+      {latest && (
+        <p className="mt-1 text-neutral-700 dark:text-neutral-300">
+          The corrected statement asks for {formatUsd(latest.amountDue)} instead of {formatUsd(c.bill.amountDue)}.{' '}
+          {left.length === 0
+            ? 'It now matches what your EOB says you owe.'
+            : `It still differs from your EOB${stillOver > 0 ? ` by ${formatUsd(stillOver)}` : ''}: worth another look.`}
+        </p>
+      )}
+    </section>
+  );
+}
+
+function ReplyHistory({ c }: { c: Case }) {
+  const fmt = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  return (
+    <section aria-label="Replies" data-testid="reply-history" className="flex flex-col gap-2">
+      <h2 className="text-lg font-semibold">Replies from the provider</h2>
+      <ol className="flex flex-col gap-2">
+        {c.replies.map((r, i) => (
+          <li key={i} data-outcome={r.outcome} className="rounded-xl border border-neutral-300 p-4 text-sm dark:border-neutral-700">
+            <p className="font-semibold">
+              {fmt(r.receivedAt)} · {OUTCOME_LABELS[r.outcome]}
+            </p>
+            {r.bill && <p className="text-neutral-600 dark:text-neutral-400">New amount due: {formatUsd(r.bill.amountDue)}</p>}
+            {r.outcome === 'denied' && (
+              <p className="text-neutral-600 dark:text-neutral-400">
+                You can ask {c.eob.insurer} to confirm what you owe, or request an itemized bill if you haven&apos;t received one.
+              </p>
+            )}
+            {r.outcome === 'more_info' && (
+              <p className="text-neutral-600 dark:text-neutral-400">Send what they asked for, quoting {caseRef(c.id)}, then log their next reply here.</p>
+            )}
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }

@@ -2,6 +2,7 @@
 // Drafted with placeholders; the browser fills them from the profile at approval time.
 import { formatUsd, formatUsDate } from './format';
 import type { Profile } from './profile';
+import { caseRef } from './replies';
 import type { Case, Flag } from './types';
 
 export const PLACEHOLDERS = ['{{PATIENT_NAME}}', '{{MEMBER_ID}}', '{{ADDRESS}}'] as const;
@@ -68,6 +69,7 @@ export function draftLetter(c: Case, todayIso: string): string {
     'Patient: {{PATIENT_NAME}}',
     `Insurance: ${c.eob.insurer}, member ID {{MEMBER_ID}}`,
     `Insurance claim ID: ${c.eob.claimId}`,
+    `Ref: ${caseRef(c.id)} (please quote this reference in your reply)`,
     '',
     'Dear Billing Department,',
     '',

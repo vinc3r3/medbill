@@ -100,13 +100,16 @@ are verified by signature.
     check). Totals: in dispute / money saved (resolved) / to review. Upload flow moved to `/new`, profile also
     on `/settings`, `/` → `/dashboard` until Task 18's landing page.
 
-- [ ] **15. Track replies.** The letter carries a case reference (e.g. `Ref: MB-7F3A`). On the case page,
+- [x] **15. Track replies.** The letter carries a case reference (e.g. `Ref: MB-7F3A`). On the case page,
   "I got a reply": the user uploads a photo of the provider's response, which goes through the same on-device
   OCR → redaction → extraction; the user picks the outcome (corrected / denied / more info needed). A corrected
   bill is compared with the EOB; the case moves to `resolved` with the actual amount saved. No reply after 30
   days → the reminder suggests a follow-up letter.
   - Done when: for case C, uploading a corrected statement ($45 due) marks the case `resolved` with $367
     saved, and the dashboard total uses actual savings for resolved cases.
+  - Note: `Case.replies` (migration 0005); rules in `lib/replies.ts`. Only "corrected" needs an upload; "denied" /
+    "more info" keep the case open. Follow-up letter is suggested, not generated. Sample corrected statement:
+    `samples/c/c-corrected.png`. Check: `npm run e2e:reply` (local; $367 saved, dashboard "Money saved" $367).
 
 - [ ] **16. Decide pricing.** The need is occasional (a few bills a year), so a monthly subscription may churn.
   Compare: monthly ($10–15), annual plan, pay per letter (~$5–10 cost each in live mode), success fee

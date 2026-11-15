@@ -23,11 +23,14 @@ export type Flag = {
   explanation: string;  // plain language, phrased as a question to verify
 };
 
+export type ReplyOutcome = 'corrected' | 'denied' | 'more_info';
+export type Reply = { outcome: ReplyOutcome; receivedAt: string; bill: BillDoc | null };
+
 export type CaseStatus = 'uploaded' | 'checked' | 'letter_ready' | 'sent' | 'delivered' | 'resolved';
 export type Case = {
   id: string; status: CaseStatus; bill: BillDoc; eob: EobDoc; flags: Flag[];
   letter: string | null; mailLetterId: string | null; previewUrl: string | null; sentAt: string | null;
-  savedAmount: number; createdAt: string;
+  savedAmount: number; createdAt: string; replies: Reply[];
 };
 ```
 
@@ -86,6 +89,7 @@ Replace, case-insensitively, before any network call:
 | `POST /api/letter` | `{ caseId }` | `{ letter: string }` with placeholders (status → `letter_ready`) |
 | `POST /api/send` | `{ caseId, letterText, to, from }` | `{ mailLetterId, previewUrl }` (status → `sent`) |
 | `POST /api/mail-webhook` | PostGrid `letter.updated` event | updates `status` |
+| `POST /api/cases/:id/reply` | `{ outcome, bill?: BillDoc }` | `Case` (corrected → `resolved`) |
 | `POST /api/cases/:id/simulate-delivery` | none | status → `delivered` (demo only) |
 | `GET /api/cases` | none | `Case[]` |
 | `GET /api/cases/:id/preview` | none | redirect to a fresh PDF preview link (provider links expire) |
@@ -167,4 +171,18 @@ provider's response (same on-device OCR → redaction → extraction path as a b
 `resolved` and `savedAmount` becomes the actual saving (`original amountDue − new amountDue`, never more than
 the amount questioned). Each letter carries a case reference (`Ref: MB-` + first 4 hex of the case id,
 uppercased) so any reply can be matched. Automatic options (reply-by-email address, virtual mailbox) are stretch.
+
+Details (decided in Task 15; rules in `lib/replies.ts`, migration 0005 adds `cases.replies jsonb`):
+- Replies are accepted only while the case is `sent` or `delivered` (a reply may beat the tracking event).
+  Every reply is appended to `replies`, so a `more_info` followed by `corrected` keeps both.
+- Only `corrected` needs an upload: the photo is read as a `bill` (same OCR → redaction → `/api/extract`)
+  and stored as `reply.bill`. `denied` and `more_info` record the outcome only and keep the case open
+  (status and `savedAmount` unchanged) with a suggested next step.
+- `corrected` resolves the case with `savedAmount` = `original amountDue − new amountDue`, clamped to
+  `0…amount questioned` (in cents). A "corrected" statement that isn't lower than the original is refused
+  (choose "denied"). The amount questioned is recomputed from the flags, so it survives `savedAmount` changing.
+- The corrected statement is compared with the EOB with `checkFlags`; the case page says whether it now matches.
+- Reminder (30 days after sending): suggests a follow-up letter quoting the reference. The follow-up letter
+  itself isn't generated in the MVP.
+- Sample: `samples/c/c-corrected.png` + `corrected.json` (each line at the EOB patient share, $45 due).
 

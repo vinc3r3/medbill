@@ -1,6 +1,6 @@
 // Runtime validators mirroring lib/types.ts. Used for sample data and AI output.
 import { z } from 'zod';
-import type { BillDoc, BillLine, Case, EobDoc, EobLine, Flag } from './types';
+import type { BillDoc, BillLine, Case, EobDoc, EobLine, Flag, Reply } from './types';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'expected YYYY-MM-DD');
 const money = z
@@ -47,6 +47,12 @@ export const FlagSchema = z.object({
   explanation: z.string().min(1),
 });
 
+export const ReplySchema = z.object({
+  outcome: z.enum(['corrected', 'denied', 'more_info']),
+  receivedAt: z.string().min(1),
+  bill: BillDocSchema.nullable(),
+});
+
 export const CaseSchema = z.object({
   id: z.string().min(1),
   status: z.enum(['uploaded', 'checked', 'letter_ready', 'sent', 'delivered', 'resolved']),
@@ -59,6 +65,7 @@ export const CaseSchema = z.object({
   sentAt: z.string().nullable(),
   savedAmount: money,
   createdAt: z.string().min(1),
+  replies: z.array(ReplySchema),
 });
 
 export const SampleExpectedSchema = z.object({
@@ -77,5 +84,6 @@ export type _SchemaChecks = [
   Assert<Equals<z.infer<typeof EobLineSchema>, EobLine>>,
   Assert<Equals<z.infer<typeof EobDocSchema>, EobDoc>>,
   Assert<Equals<z.infer<typeof FlagSchema>, Flag>>,
+  Assert<Equals<z.infer<typeof ReplySchema>, Reply>>,
   Assert<Equals<z.infer<typeof CaseSchema>, Case>>,
 ];
