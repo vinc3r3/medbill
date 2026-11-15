@@ -4,7 +4,7 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
-import { createTestUser, deleteTestUser, openHome, signIn } from './e2e-helpers.mjs';
+import { createTestUser, deleteTestUser, openHome, signIn, givePlan } from './e2e-helpers.mjs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const OUT_DIR = process.env.OUT_DIR ?? '.e2e';
@@ -15,6 +15,7 @@ let post; // set once signed in, so API calls carry the session cookie
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const user = await createTestUser('send');
+await givePlan(user);
 let caseId = null;
 let failures = 0;
 const fail = (msg) => { failures++; console.log(`  FAIL ${msg}`); };

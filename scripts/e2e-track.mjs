@@ -4,7 +4,7 @@
 import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright-core';
-import { createTestUser, deleteTestUser, signIn } from './e2e-helpers.mjs';
+import { createTestUser, deleteTestUser, signIn, givePlan } from './e2e-helpers.mjs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const SECRET = process.env.POSTGRID_WEBHOOK_SECRET;
@@ -21,6 +21,7 @@ const jwt = (payload, secret) => {
 const profile = JSON.parse(readFileSync('samples/profile.json', 'utf8'));
 const browser = await chromium.launch({ channel: 'chrome' });
 const user = await createTestUser('track');
+await givePlan(user);
 
 try {
   console.log('webhook security:');

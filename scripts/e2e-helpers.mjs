@@ -42,3 +42,24 @@ export async function openHome(page, baseUrl) {
   await page.locator('[data-testid="upload-form"][data-ready]').waitFor({ timeout: 30_000 });
   await page.locator('[data-testid="profile-form"][data-ready]').waitFor({ timeout: 30_000 });
 }
+
+/**
+ * Test shortcut for checks that aren't about payments: gives the user an active annual plan (4 letters) straight
+ * in the database, so sending isn't blocked by the paywall. The real Stripe path is checked by e2e:stripe.
+ */
+export async function givePlan(userOrEmail) {
+  let id = typeof userOrEmail === 'object' ? userOrEmail.id : null;
+  if (!id) {
+    const { data } = await adminClient().auth.admin.listUsers({ perPage: 1000 });
+    id = data?.users.find((u) => u.email === userOrEmail)?.id ?? null;
+  }
+  if (!id) throw new Error('givePlan: user not found');
+  const day = 86_400_000;
+  const { error } = await adminClient().from('billing').upsert({
+    user_id: id,
+    plan_status: 'active',
+    plan_period_start: new Date(Date.now() - day).toISOString(),
+    plan_period_end: new Date(Date.now() + 365 * day).toISOString(),
+  });
+  if (error) throw new Error(`givePlan: ${error.message}`);
+}

@@ -119,7 +119,7 @@ are verified by signature.
     section and Task 17 is updated to match.
   - Note: free checks + $14.99 per letter + optional $39/year plan (4 letters). Details in the spec's "Payments".
 
-- [ ] **17. Add Stripe (test mode).** Free checks, $14.99 per letter, optional $39/year plan with 4 letters
+- [x] **17. Add Stripe (test mode).** Free checks, $14.99 per letter, optional $39/year plan with 4 letters
   (spec, "Payments"). Setup script creates the two Prices; Checkout for a single letter (per case) and for the
   plan; Customer Portal from Settings; `/api/stripe-webhook` (signature-verified, idempotent) grants and removes
   access; `/api/send` needs a paid case or a plan letter left (pure rule, tests first); Settings shows the plan
@@ -128,8 +128,11 @@ are verified by signature.
     plan); sending is blocked (402) without payment or plan letters; a 5th plan letter in a year is blocked; a
     failed payment (card 4000 0000 0000 0341) or a cancelled plan removes access; a refund before sending
     unpays the case.
-  - Skipped for now (2026-11-15, user's call): needs a Stripe test key and webhook forwarding. Sending stays free;
-    the landing page and Settings say payments aren't switched on in the demo.
+  - Note: `npm run stripe:setup` (Prices), `npm run dev:stripe` (dev server + `stripe listen`, no `stripe login`
+    needed), migration 0006. Check: `HEADED=1 npm run e2e:stripe` (Stripe's bot check sometimes stalls headless
+    Checkout; the test retries; desktop viewport because emulated-mobile clicks on Stripe's Pay don't register).
+    Failed renewal is tested with a Stripe test clock. Other e2e checks give their user a plan in the DB (`givePlan`).
+    Vercel: add `STRIPE_SECRET_KEY` + a Dashboard webhook endpoint's `STRIPE_WEBHOOK_SECRET`.
 
 - [x] **18. Frontend enhancement.** Landing page, app shell, case page with a tracking timeline, settings page
   for the profile and plan; consistent design, mobile-first.

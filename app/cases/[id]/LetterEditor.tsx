@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useProfile } from '@/app/hooks/useProfile';
 import { postJson } from '@/lib/api-client';
+import { loadApprovedLetter, type ApprovedLetter } from '@/lib/approved-letter-store';
+import type { PaymentView } from '@/lib/billing';
 import { PLACEHOLDERS, fillPlaceholders, type Placeholder } from '@/lib/letter';
 import { SendPanel } from './SendPanel';
 
@@ -17,19 +19,36 @@ type State =
   | { kind: 'none' }
   | { kind: 'drafting' }
   | { kind: 'editing'; draft: string; original: string }
-  | { kind: 'approved'; draft: string; original: string; filled: string };
+  | { kind: 'approved'; draft: string; original: string; filled: string; restored?: ApprovedLetter };
 
 /**
  * Draft (from the server, with placeholders) → edit → approve. Approval fills the placeholders here in
  * the browser from the saved profile; edits are not saved to the server.
  */
-export function LetterEditor({ caseId, initialLetter, providerName }: { caseId: string; initialLetter: string | null; providerName: string }) {
+export function LetterEditor({
+  caseId,
+  initialLetter,
+  providerName,
+  payment,
+}: {
+  caseId: string;
+  initialLetter: string | null;
+  providerName: string;
+  payment: PaymentView | null;
+}) {
   const profile = useProfile();
   const [state, setState] = useState<State>(
     initialLetter ? { kind: 'editing', draft: initialLetter, original: initialLetter } : { kind: 'none' },
   );
   const [error, setError] = useState<string | null>(null);
   const [missing, setMissing] = useState<Placeholder[]>([]);
+
+  // Back from Stripe Checkout: the letter approved before paying was kept in this tab (sessionStorage).
+  useEffect(() => {
+    const saved = loadApprovedLetter(caseId);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- browser-only storage, read after hydration
+    if (saved) setState({ kind: 'approved', draft: saved.draft, original: saved.original, filled: saved.filled, restored: saved });
+  }, [caseId]);
 
   async function draft() {
     setError(null);
@@ -83,7 +102,13 @@ export function LetterEditor({ caseId, initialLetter, providerName }: { caseId: 
         >
           Edit again
         </button>
-        <SendPanel caseId={caseId} providerName={providerName} filledLetter={state.filled} />
+        <SendPanel
+          caseId={caseId}
+          providerName={providerName}
+          letter={{ draft: state.draft, original: state.original, filled: state.filled }}
+          restored={state.restored}
+          payment={payment}
+        />
       </section>
     );
   }

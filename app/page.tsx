@@ -124,7 +124,7 @@ export default function LandingPage() {
           <Price name="Single letter" price="$14.99" body="One certified letter to the billing office, with tracking." />
           <Price name="Annual plan" price="$39/year" body="Four certified letters a year. Cancel any time." />
         </div>
-        <p className="text-sm text-muted">Payments aren&apos;t switched on in this demo, so letters are free to try.</p>
+        <p className="text-sm text-muted">Demo runs on Stripe test mode: pay with test card 4242 4242 4242 4242, nothing is charged.</p>
       </section>
 
       <section className="border-t border-line bg-surface">

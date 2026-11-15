@@ -6,7 +6,7 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
-import { deleteTestUser } from './e2e-helpers.mjs';
+import { deleteTestUser, givePlan } from './e2e-helpers.mjs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const OUT_DIR = join(process.env.OUT_DIR ?? '.e2e', 'frontend');
@@ -59,6 +59,7 @@ try {
   await page.waitForURL((u) => u.pathname === '/dashboard', { timeout: 30_000 });
   check(true, 'sign-up from the landing page lands on the dashboard');
   await page.getByText('No cases yet').waitFor();
+  await givePlan(email); // sending isn't what this check is about (see e2e:stripe)
   await pageOk(page, 'dashboard-empty');
 
   // New check: details, upload, read, check.

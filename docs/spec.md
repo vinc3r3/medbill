@@ -93,6 +93,9 @@ Replace, case-insensitively, before any network call:
 | `POST /api/cases/:id/simulate-delivery` | none | status → `delivered` (demo only) |
 | `GET /api/cases` | none | `Case[]` |
 | `GET /api/cases/:id/preview` | none | redirect to a fresh PDF preview link (provider links expire) |
+| `POST /api/checkout` | `{ kind: 'letter', caseId } \| { kind: 'plan', caseId? }` | `{ url }` of Stripe Checkout (Task 17) |
+| `POST /api/billing-portal` | none | `{ url }` of the Stripe Customer Portal |
+| `POST /api/stripe-webhook` | Stripe event (signature-verified) | grants/removes access |
 
 `/api/letter` and `/api/extract` must never receive profile values. `/api/letter` uses no AI (template).
 
@@ -194,6 +197,15 @@ Events are processed idempotently (event id stored), since Stripe retries.
 **Plan letters used** = the user's cases sent with `paidVia: 'plan'` since the current period start. Customer
 Portal (from Settings) to update the card, see invoices and cancel. Portal cancellation takes effect at period
 end (standard); access stays until then.
+
+Details (decided in Task 17; rules in `lib/billing.ts`, flows in `lib/billing-server.ts`, migration 0006):
+- A case paid on its own never uses a plan letter. `paid_via = 'letter'` is set by the webhook; `'plan'` is set
+  by `/api/send` after the letter is created. Checkout is charged in USD only (adaptive pricing off).
+- A failed renewal (`invoice.payment_failed`) stops plan letters even if Stripe keeps the subscription `active`
+  while it retries. Subscription events re-read the subscription, so out-of-order delivery can't store stale state.
+- After paying, the case page waits for the webhook (polls ~45s), then sends the letter approved before Checkout.
+- `/api/send` sends `paid_via = null` cases only with a plan letter left; otherwise 402 with the reason.
+- `Case` (above) is unchanged: payment state is read on the server and isn't part of the `Case` shape.
 
 **Data** (Task 17 migration): `billing(user_id pk, stripe_customer_id, plan_status, plan_period_start,
 plan_period_end, stripe_subscription_id)`, `stripe_events(id pk, created_at)`, and on `cases`:

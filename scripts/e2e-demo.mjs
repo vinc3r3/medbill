@@ -6,7 +6,7 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
-import { createTestUser, deleteTestUser, signIn } from './e2e-helpers.mjs';
+import { createTestUser, deleteTestUser, signIn, givePlan } from './e2e-helpers.mjs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const RUNS = Number(process.env.RUNS ?? 3);
@@ -20,6 +20,7 @@ const [mm, dd, yyyy] = profile.dateOfBirth.split('/');
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const user = await createTestUser('demo');
+await givePlan(user);
 const consoleErrors = [];
 try {
   const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })).newPage();

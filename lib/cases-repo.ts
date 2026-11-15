@@ -53,7 +53,7 @@ export function patchToRow(patch: CasePatch): Partial<CaseRow> {
 }
 
 let client: SupabaseClient | null = null;
-function db(): SupabaseClient {
+export function db(): SupabaseClient {
   client ??= createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_SECRET_KEY'), {
     auth: { persistSession: false },
   });

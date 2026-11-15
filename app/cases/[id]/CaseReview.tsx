@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { connection } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
+import { planIsActive, type PaymentView } from '@/lib/billing';
+import { caseAccess } from '@/lib/billing-server';
 import { getCase } from '@/lib/cases-repo';
 import { formatUsd, formatUsDate } from '@/lib/format';
 import { FLAG_LABELS, rowMarks } from '@/lib/review';
@@ -28,10 +30,22 @@ export async function CaseReview({ params }: { params: Promise<{ id: string }> }
   if (!UUID.test(id)) notFound();
   const found = await getCase(id, user.id); // someone else's case → 404, same as a missing one
   if (!found) notFound();
-  return <ReviewView c={found} />;
+  return <ReviewView c={found} payment={found.status === 'letter_ready' || found.status === 'checked' ? await paymentView(found.id, user.id) : null} />;
 }
 
-function ReviewView({ c }: { c: Case }) {
+async function paymentView(caseId: string, userId: string): Promise<PaymentView> {
+  const a = await caseAccess(caseId, userId);
+  if (!a) return { canSend: false, via: null, message: null, planActive: false, lettersLeft: 0 };
+  return {
+    canSend: a.access.ok,
+    via: a.access.ok ? a.access.via : null,
+    message: a.access.ok ? null : a.access.message,
+    planActive: planIsActive(a.billing, new Date()),
+    lettersLeft: a.lettersLeft,
+  };
+}
+
+function ReviewView({ c, payment }: { c: Case; payment: PaymentView | null }) {
   const marks = rowMarks(c.flags);
   const toQuestion = questionedAmount(c);
 
@@ -106,7 +120,7 @@ function ReviewView({ c }: { c: Case }) {
 
 
       {c.flags.length > 0 && (c.status === 'checked' || c.status === 'letter_ready') && (
-        <LetterEditor caseId={c.id} initialLetter={c.letter} providerName={c.bill.provider} />
+        <LetterEditor caseId={c.id} initialLetter={c.letter} providerName={c.bill.provider} payment={payment} />
       )}
     </>
   );

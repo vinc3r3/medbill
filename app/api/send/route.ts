@@ -1,9 +1,12 @@
 // POST /api/send — { caseId, letterText, to, from } → { mailLetterId, previewUrl }  (status → "sent")
 // Creates a certified letter with the mail provider (PostGrid, TEST mode only). The filled letter passes
 // through here to the provider and is not stored; the case keeps only the placeholder draft.
+// Needs a paid case or a plan letter left (lib/billing.ts); otherwise 402 with a readable message.
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { requireApiUser } from '@/lib/auth';
+import { setCasePaidVia } from '@/lib/billing-repo';
+import { caseAccess } from '@/lib/billing-server';
 import { getCase, updateCase } from '@/lib/cases-repo';
 import { jsonError, readBody, serverError } from '@/lib/http';
 import { letterToHtml } from '@/lib/letter-html';
@@ -47,6 +50,8 @@ export async function POST(request: Request) {
     if (found.status !== 'letter_ready') {
       return jsonError(409, found.mailLetterId ? 'This letter has already been sent.' : 'Draft and approve the letter first.');
     }
+    const pay = await caseAccess(found.id, user.id);
+    if (!pay?.access.ok) return jsonError(402, pay && !pay.access.ok ? pay.access.message : 'Payment is required to send this letter.');
 
     const html = letterToHtml(body.letterText);
     // Retries of the same letter reuse the key (no duplicate mail); an edited letter gets a new one.
@@ -64,6 +69,8 @@ export async function POST(request: Request) {
     }
 
     await updateCase(found.id, user.id, { status: 'sent', mailLetterId: letter.id, previewUrl: letter.previewUrl, sentAt: new Date().toISOString() });
+    // A plan send uses one plan letter (counted from sent cases with paid_via = 'plan').
+    if (pay.access.via === 'plan') await setCasePaidVia(found.id, user.id, 'plan');
     return Response.json({ mailLetterId: letter.id, previewUrl: letter.previewUrl });
   } catch (err) {
     if (err instanceof MailError) return jsonError(err.status, err.message);

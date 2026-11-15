@@ -6,7 +6,7 @@
 import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
-import { createTestUser, deleteTestUser, openHome, signIn } from './e2e-helpers.mjs';
+import { createTestUser, deleteTestUser, openHome, signIn, givePlan } from './e2e-helpers.mjs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const OUT_DIR = process.env.OUT_DIR ?? '.e2e';
@@ -21,6 +21,7 @@ const needles = [...Object.values(profile), 'Jordan', 'Rivera', '1427 Maple Grov
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const user = await createTestUser('reply');
+await givePlan(user);
 try {
   const context = await browser.newContext({ viewport: { width: 1200, height: 1000 } });
   const page = await context.newPage();

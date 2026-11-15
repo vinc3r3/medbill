@@ -29,6 +29,8 @@ try {
     ['POST', '/api/letter', { caseId: FAKE_ID }],
     ['POST', '/api/send', { caseId: FAKE_ID }],
     ['GET', `/api/cases/${FAKE_ID}/preview`],
+    ['POST', '/api/checkout', { kind: 'letter', caseId: FAKE_ID }],
+    ['POST', '/api/billing-portal', {}],
   ];
   for (const [method, path, data] of routes) {
     const r = method === 'GET' ? await api.get(BASE_URL + path, { maxRedirects: 0 }) : await api.post(BASE_URL + path, { data, maxRedirects: 0 });
@@ -87,7 +89,7 @@ try {
   await bobPage.goto(`${BASE_URL}/cases/${created.id}`);
   await bobPage.waitForLoadState('networkidle');
   const bobHtml = await bobPage.content();
-  check(/could not be found/i.test(await bobPage.locator('body').innerText()), "Bob opening Alice's case page sees the 404 page");
+  check(/couldn't find that page|could not be found/i.test(await bobPage.locator('body').innerText()), "Bob opening Alice's case page sees the 404 page");
   check(!/Summit Urgent Care|CLM-260721-0956/.test(bobHtml), "none of Alice's case data is in Bob's page (HTML or streamed payload)");
   for (const [path, data] of [['/api/check', { caseId: created.id }], ['/api/letter', { caseId: created.id }]]) {
     const r = await bobPage.request.post(BASE_URL + path, { data });
